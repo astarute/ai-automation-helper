@@ -449,7 +449,7 @@ V.transition=p=>{const tr=p.trans,rec=govRecord(p);
   ${tr.summary?`<div class="draft">${esc(tr.summary)}</div>`:''}
   <div class="grid3"><div><label for="tS">시작일</label><input type="date" id="tS" value="${esc(tr.start)}"></div><div><label for="tE">종료일</label><input type="date" id="tE" value="${esc(tr.end)}"></div>
   <div><label for="tR">전환 결과</label><select id="tR"><option value="">진행 중</option>${opt(tr.result,['시범 운영 중','도입 완료','중단','AI 없이 개선'])}</select></div></div>
- </div><div class="col"><span class="tag t-ex">정부 제출 · 비식별 과정 기록</span>
+ </div><div class="col">
   <label class="ck"><input type="checkbox" id="cs" ${tr.consent?'checked':''}>기업이 아래 항목 제출에 동의함</label>
   <div class="scroll"><table><thead><tr><th>후보 분야</th><th>결론</th><th>채택</th><th>결과</th><th>회수</th><th class="n">주</th></tr></thead>
   <tbody>${rec.map(x=>`<tr><td>${esc(x.후보분야)}</td><td>${esc(x.판별결론)}</td><td>${esc(x.채택여부)}</td><td>${esc(x.전환결과)}</td><td style="white-space:nowrap">${esc(x.회수기간범주)}</td><td class="n">${esc(x.걸린기간_주)}</td></tr>`).join('')||'<tr><td colspan="6" class="note">판별 결론이 있는 작업이 없습니다.</td></tr>'}</tbody></table></div>
