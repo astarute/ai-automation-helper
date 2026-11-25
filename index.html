@@ -296,7 +296,18 @@ let PH=[],phDB=null,phMem=false;const noPerson={};
 const LABELS=['양품','긁힘','미성형','흑점','은줄','변형','기타'];
 function openDB(){return new Promise((res,rej)=>{try{const r=indexedDB.open('aiPlatPhotos',1);r.onupgradeneeded=()=>r.result.createObjectStore('p',{keyPath:'id'});r.onsuccess=()=>res(r.result);r.onerror=()=>rej(r.error)}catch(e){rej(e)}})}
 function tx(mode,fn){return new Promise((res,rej)=>{if(!phDB)return res(null);try{const t=phDB.transaction('p',mode),r=fn(t.objectStore('p'));t.oncomplete=()=>res(r?.result);t.onerror=()=>rej(t.error)}catch(e){rej(e)}})}
-(async()=>{await null;try{phDB=await openDB();const rows=await tx('readonly',st=>st.getAll());PH=(rows||[]).map(r=>({...r,url:URL.createObjectURL(r.blob)}))}catch(e){phDB=null;phMem=true}render()})();
+(async()=>{await null;try{phDB=await openDB();const rows=await tx('readonly',st=>st.getAll());PH=(rows||[]).map(r=>({...r,url:URL.createObjectURL(r.blob)}))}catch(e){phDB=null;phMem=true}await seedDemo();render()})();
+/* 시연용 예시 그림: 처음 한 번만 외관 검사(t1)에 넣음. 실제 사진이 아니라 그린 그림 */
+const DEMO=[['conveyor','컨베이어 장면 (예시 그림)'],['good','양품 (예시 그림)'],['speck','흑점 (예시 그림)'],['scratch','긁힘 (예시 그림)'],['short','미성형 (예시 그림)']];
+async function seedDemo(force){
+  let done=false;try{done=localStorage.getItem('aiPlat.demoPh')==='1'}catch(e){}
+  if(done&&!force)return;const p=S.projects.find(x=>x.id==='p1');if(!p||!p.tasks.some(t=>t.id==='t1'))return;
+  if(PH.some(r=>r.proj==='p1'&&r.task==='t1'))return;
+  for(const[f,label]of DEMO){try{const res=await fetch('demo/'+f+'.jpg');if(!res.ok)continue;const blob=await res.blob();
+    const r={id:'demo-'+f,proj:'p1',task:'t1',label,date:'2026-11-17',blob};try{await tx('readwrite',st=>st.put(r))}catch(e){}
+    PH.push({...r,url:URL.createObjectURL(blob)})}catch(e){}}
+  if(PH.some(r=>r.id.startsWith('demo-'))&&!phMem){try{localStorage.setItem('aiPlat.demoPh','1')}catch(e){}}
+}
 async function shrink(file){ // 1600px 이하 JPEG로 다시 그림: 용량을 줄이고 위치(GPS) 등 사진 정보도 지워짐
   const bmp=await createImageBitmap(file),k=Math.min(1,1600/Math.max(bmp.width,bmp.height)),c=document.createElement('canvas');
   c.width=Math.round(bmp.width*k);c.height=Math.round(bmp.height*k);c.getContext('2d').drawImage(bmp,0,0,c.width,c.height);bmp.close?.();
@@ -550,7 +561,7 @@ async function saveFile(name,data){let dl=null;try{dl=window.claude?await claude
 $('#exp').onclick=()=>saveFile('AI도우미_작업파일_'+today()+'.json',JSON.stringify(S));
 $('#impB').onclick=()=>$('#imp').click();
 $('#imp').onchange=async e=>{try{const o=JSON.parse(await e.target.files[0].text());if(!o.projects)throw 0;S=o;save();render();toast('불러왔습니다')}catch(x){toast('작업 파일이 아닙니다')}};
-let rs=0;$('#reset').onclick=e=>{if(!rs){rs=1;e.target.textContent='한 번 더 누르면 모든 작업이 지워집니다';setTimeout(()=>{rs=0;e.target.textContent='예시로 초기화'},4000);return}delPhotos(()=>true);S=sample();save();rs=0;e.target.textContent='예시로 초기화';render()};
+let rs=0;$('#reset').onclick=e=>{if(!rs){rs=1;e.target.textContent='한 번 더 누르면 모든 작업이 지워집니다';setTimeout(()=>{rs=0;e.target.textContent='예시로 초기화'},4000);return}delPhotos(()=>true).then(()=>seedDemo(true)).then(render);S=sample();save();rs=0;e.target.textContent='예시로 초기화';render()};
 addEventListener('keydown',e=>{if(e.key==='Escape'){if($('#modal').classList.contains('open'))$('#mNo').click();$('#pv').classList.remove('open')}});
 $('#pvX').onclick=()=>$('#pv').classList.remove('open');$('#pv').onclick=e=>{if(e.target.id==='pv')$('#pv').classList.remove('open')};
 render();
