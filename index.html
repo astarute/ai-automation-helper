@@ -70,6 +70,12 @@ pre{white-space:pre-wrap;background:var(--panel);padding:12px;border-radius:6px;
 /* 모달 */
 .modal{position:fixed;inset:0;background:rgb(0 0 0/.5);display:none;place-items:center;padding:16px;z-index:9}
 .modal.open{display:grid}.box{background:var(--bg);border-radius:12px;max-width:760px;width:100%;max-height:90vh;overflow:auto;padding:20px;border-top:6px solid var(--red)}
+.phs{display:grid;grid-template-columns:repeat(auto-fill,minmax(120px,1fr));gap:10px;margin-top:10px}
+.phs figure{margin:0;background:var(--bg);border:1px solid var(--line);border-radius:6px;overflow:hidden}
+.phs img{display:block;width:100%;aspect-ratio:1;object-fit:cover;cursor:zoom-in}
+.phs figcaption{padding:6px}.phs input{min-height:36px;padding:4px 6px;font-size:14px}.phs button{min-height:36px;padding:4px 8px;font-size:13px;width:100%;margin-top:4px}
+.pcbox{border:2px solid var(--green);background:var(--greenBg);border-radius:8px;padding:12px;margin-top:12px}
+#pv .box{border-top-color:var(--green);max-width:1000px}#pv img{display:block;max-width:100%;max-height:72vh;margin:0 auto;border-radius:6px}
 .toast{position:fixed;bottom:16px;left:50%;transform:translateX(-50%);background:var(--ink);color:var(--bg);padding:10px 16px;border-radius:8px;font-size:15px;opacity:0;transition:opacity .2s;pointer-events:none;z-index:10}
 .toast.show{opacity:1}
 footer{color:var(--mute);font-size:14px;border-top:1px solid var(--line)}
@@ -106,7 +112,7 @@ table{font-size:13px}.stack thead{display:none}.stack tr{display:grid;padding-bl
     <button id="impB">작업 파일 불러오기</button><input type="file" id="imp" accept="application/json" hidden>
     <button class="ghost" id="reset">예시로 초기화</button>
   </div>
-  <p class="note">내보낸 작업 파일에는 원문과 수치가 들어 있으니 회사 PC 밖으로 옮기지 마세요. 처음 열면 예시 데이터(가상의 기업·학생)가 들어 있습니다.</p>
+  <p class="note">내보낸 작업 파일에는 원문과 수치가 들어 있으니 회사 PC 밖으로 옮기지 마세요. 제품 사진은 작업 파일에 포함되지 않고 이 브라우저에만 남습니다. 처음 열면 예시 데이터(가상의 기업·학생)가 들어 있습니다.</p>
 </div></footer>
 
 <div class="modal" id="modal" role="dialog" aria-modal="true" aria-labelledby="mT"><div class="box">
@@ -117,6 +123,7 @@ table{font-size:13px}.stack thead{display:none}.stack tr{display:grid;padding-bl
     <button id="mNo">취소</button><button class="ai" id="mOk">이 내용만 보내기</button>
   </div>
 </div></div>
+<div class="modal" id="pv" role="dialog" aria-modal="true" aria-label="사진 크게 보기"><div class="box"><img id="pvI" alt=""><div class="row" style="justify-content:space-between;margin-top:10px"><span id="pvC" class="note"></span><button id="pvX">닫기</button></div></div></div>
 <div class="toast" id="toast"></div>
 
 <script>
@@ -124,7 +131,7 @@ table{font-size:13px}.stack thead{display:none}.stack tr{display:grid;padding-bl
 const $=s=>document.querySelector(s);
 const esc=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const uid=()=>Math.random().toString(36).slice(2,9);
-const today=()=>new Date().toISOString().slice(0,10);
+const today=()=>{const d=new Date();return new Date(d-d.getTimezoneOffset()*6e4).toISOString().slice(0,10)};
 const toast=m=>{const t=$('#toast');t.textContent=m;t.classList.add('show');clearTimeout(toast.h);toast.h=setTimeout(()=>t.classList.remove('show'),2600)};
 
 const STAGES=[
@@ -239,7 +246,7 @@ function maskObj(o){let hits=0;const w=v=>{if(typeof v==='string'){const m=mask(
 
 /* ---------- AI 호출: 전송 내용 확인 → 기록 → 호출 ---------- */
 let samp=null;
-(async()=>{try{samp=await claude.use('sample')}catch(e){samp=null}render()})();
+(async()=>{await null;try{samp=window.claude?await claude.use('sample'):null}catch(e){samp=null}render()})();
 function confirmSend(purpose,payload,hits){
   return new Promise(res=>{
     $('#mS').textContent=`목적: ${purpose} · 비식별 처리 ${hits}곳 · 공정 수치, 인건비, 제품 사진, 노하우 원문은 포함되지 않습니다.`;
@@ -285,6 +292,32 @@ function status(p){
    design:!!(p&&p.design.pick&&p.design.expert.ok),brief:!!(p&&p.brief.decision),transition:!!(p&&p.trans.consent&&p.trans.result)}}
 
 /* ---------- 화면 ---------- */
+/* ---------- 제품 사진: 이 브라우저(IndexedDB)에만 저장, AI·정부 기록에는 쓰지 않음 ---------- */
+let PH=[],phDB=null,phMem=false;const noPerson={};
+const LABELS=['양품','긁힘','미성형','흑점','은줄','변형','기타'];
+function openDB(){return new Promise((res,rej)=>{try{const r=indexedDB.open('aiPlatPhotos',1);r.onupgradeneeded=()=>r.result.createObjectStore('p',{keyPath:'id'});r.onsuccess=()=>res(r.result);r.onerror=()=>rej(r.error)}catch(e){rej(e)}})}
+function tx(mode,fn){return new Promise((res,rej)=>{if(!phDB)return res(null);try{const t=phDB.transaction('p',mode),r=fn(t.objectStore('p'));t.oncomplete=()=>res(r?.result);t.onerror=()=>rej(t.error)}catch(e){rej(e)}})}
+(async()=>{await null;try{phDB=await openDB();const rows=await tx('readonly',st=>st.getAll());PH=(rows||[]).map(r=>({...r,url:URL.createObjectURL(r.blob)}))}catch(e){phDB=null;phMem=true}render()})();
+async function shrink(file){ // 1600px 이하 JPEG로 다시 그림: 용량을 줄이고 위치(GPS) 등 사진 정보도 지워짐
+  const bmp=await createImageBitmap(file),k=Math.min(1,1600/Math.max(bmp.width,bmp.height)),c=document.createElement('canvas');
+  c.width=Math.round(bmp.width*k);c.height=Math.round(bmp.height*k);c.getContext('2d').drawImage(bmp,0,0,c.width,c.height);bmp.close?.();
+  return new Promise((res,rej)=>c.toBlob(b=>b?res(b):rej(),'image/jpeg',.85))}
+async function addPhotos(task,files,label){
+  let n=0;for(const f of files){try{const blob=await shrink(f);const r={id:uid(),proj:S.cur,task,label:label||'미분류',date:today(),blob};
+    try{await tx('readwrite',st=>st.put(r))}catch(e){phMem=true}
+    PH.push({...r,url:URL.createObjectURL(blob)});n++}catch(e){toast(`${f.name}: 열 수 없는 형식입니다 (JPG·PNG 권장)`)}}
+  if(n)toast(`사진 ${n}장을 이 브라우저에 저장했습니다`);render()}
+async function delPhotos(pred){for(const r of PH.filter(pred)){URL.revokeObjectURL(r.url);try{await tx('readwrite',st=>st.delete(r.id))}catch(e){}}PH=PH.filter(r=>!pred(r))}
+const photosOf=(t)=>PH.filter(r=>r.task===t&&r.proj===S.cur);
+function photoBox(t){const list=photosOf(t.id),ok=noPerson[t.id];
+ return`<div class="pcbox"><div class="row" style="justify-content:space-between"><b>제품 사진 ${list.length?`<span class="note">${list.length}장</span>`:''}</b><span class="tag t-pc">회사 PC에만 저장 · AI로 보내지 않음</span></div>
+  ${phMem?'<p class="warn">이 브라우저는 사진을 오래 저장할 수 없습니다. 새로고침하면 사라집니다.</p>':''}
+  <label class="ck"><input type="checkbox" data-np="${t.id}" ${ok?'checked':''}>사진에 작업자·작업 장면이 없습니다 (작업자 촬영 금지)</label>
+  <div class="grid2"><div><label for="pl-${t.id}">분류</label><input id="pl-${t.id}" list="phLabels" placeholder="예: 흑점, 양품"></div>
+  <div><label for="pf-${t.id}">사진 고르기</label><input type="file" id="pf-${t.id}" data-pf="${t.id}" accept="image/*" multiple ${ok?'':'disabled'}></div></div>
+  ${list.length?`<div class="phs">${list.map(r=>`<figure><img src="${r.url}" alt="${esc(r.label)} 사진" data-pv="${r.id}"><figcaption><input aria-label="분류" list="phLabels" data-phl="${r.id}" value="${esc(r.label)}"><span class="note">${esc(r.date)}</span><button class="ghost" data-phd="${r.id}">삭제</button></figcaption></figure>`).join('')}</div>`:'<p class="note" style="margin:8px 0 0">불량 유형별로 양품과 함께 찍어 두면 판별 ④(데이터를 지금 만들 수 있나)의 근거가 됩니다.</p>'}
+ </div>`}
+
 const V={};
 V.select=()=>{
   const sc=S.scores,cm=S.committee;
@@ -322,7 +355,9 @@ V.observe=p=>`<h2>관찰</h2><p class="note">현장 작업마다 AI가 확인할
   ${p.tasks.map(t=>`<div class="card"><h3>${esc(t.name)}</h3><p class="note" style="margin:0">${esc(t.desc)}</p>
    ${t.obsQ.length?`<div class="draft">${t.obsQ.map((q,i)=>`${i+1}. ${esc(q)}`).join('\n')}</div>`:''}
    <div class="row">${aiBtn('oq-'+t.id,'확인 질문 받기')}<button class="ghost" data-del="${t.id}">작업 삭제</button></div>
-   <label for="oa-${t.id}">관찰 기록 <span class="tag t-pc">회사 PC에만 저장</span></label><textarea id="oa-${t.id}" data-obs="${t.id}">${esc(t.obsA)}</textarea></div>`).join('')}
+   <label for="oa-${t.id}">관찰 기록 <span class="note">(AI 질문에 쓸 때는 비식별 처리 후 확인을 거쳐 보냄)</span></label><textarea id="oa-${t.id}" data-obs="${t.id}">${esc(t.obsA)}</textarea>
+   ${photoBox(t)}</div>`).join('')}
+ <datalist id="phLabels">${LABELS.map(l=>`<option value="${l}">`).join('')}</datalist>
  </div><div class="col"><span class="tag t-pc">작업 추가</span>
   <label for="nt">작업 이름</label><input id="nt" placeholder="예: 포장 수량 확인">
   <label for="nd">작업 설명</label><textarea id="nd" placeholder="누가, 얼마나 자주, 어떻게 하는지"></textarea>
@@ -424,7 +459,7 @@ V.transition=p=>{const tr=p.trans,rec=govRecord(p);
 
 V.data=()=>`<h2>데이터 흐름</h2><p class="note">무엇이 어디까지 가는지. 경계를 넘을 때마다 보낼 내용을 먼저 보여주고, 보낸 내용은 아래 기록에 남습니다.</p>
  <div class="flow">
-  <div class="zone z-pc"><span class="tag t-pc">회사 PC · 이 브라우저</span><ul><li>공정 수치, 인건비, 시뮬레이션 값</li><li>작업 원문, 관찰 기록, 노하우</li><li>회사명·고객사명·이름</li><li>제품 사진 (이 도구는 사진을 받지 않음)</li></ul></div>
+  <div class="zone z-pc"><span class="tag t-pc">회사 PC · 이 브라우저</span><ul><li>공정 수치, 인건비, 시뮬레이션 값</li><li>작업 원문, 관찰 기록, 노하우</li><li>회사명·고객사명·이름</li><li>제품 사진 (관찰 단계, 이 브라우저에만 저장)</li></ul></div>
   <div class="gate">비식별 처리 + 전송 확인</div>
   <div class="zone z-ai"><span class="tag t-ai">상용 AI (기업용 계정)</span><ul><li>이름·고객사명·단가를 지운 기록</li><li>숫자 없는 시뮬레이션 틀</li><li>공개 자료집 항목</li></ul></div>
   <div class="gate">기업 동의</div>
@@ -469,6 +504,9 @@ view.addEventListener('input',e=>{const d=e.target.dataset,v=e.target.value,p=P(
   else if(e.target.id==='tst')runTest();
   save()});
 view.addEventListener('change',e=>{const d=e.target.dataset,el=e.target,id=el.id;
+  if(d.np){noPerson[d.np]=el.checked;const f=$('#pf-'+d.np);if(f)f.disabled=!el.checked;return}
+  if(d.pf){if(!noPerson[d.pf]){el.value='';return toast('작업자·작업 장면이 없는지 먼저 확인하세요')}addPhotos(d.pf,[...el.files],$('#pl-'+d.pf)?.value.trim());return}
+  if(d.phl){const r=PH.find(x=>x.id===d.phl);if(r){r.label=el.value.trim()||'미분류';const{url,...rec}=r;tx('readwrite',st=>st.put(rec)).catch(()=>{})}return}
   if(d.cm!==undefined){S.committee[d.cm]=el.checked;save();render();return}
   if(d.a){const[t,k]=d.a.split(':');upd(p=>p.tasks.find(x=>x.id===t).ans[k]=el.value);return}
   if(d.conc){upd(p=>p.tasks.find(x=>x.id===d.conc).conc=el.value);return}
@@ -476,8 +514,10 @@ view.addEventListener('change',e=>{const d=e.target.dataset,el=e.target,id=el.id
   const map={dT:p=>p.design.task=el.value,eOk:p=>p.design.expert.ok=el.checked,bD:p=>{p.brief.decision=el.value;p.brief.date=el.value?today():''},
    tS:p=>p.trans.start=el.value,tE:p=>p.trans.end=el.value,tR:p=>p.trans.result=el.value,cs:p=>p.trans.consent=el.checked,ex:p=>p.trans.extra=el.checked};
   if(map[id])upd(map[id])});
-view.addEventListener('click',async e=>{const b=e.target.closest('button');if(!b)return;const id=b.id,d=b.dataset,p=P();
-  if(d.del){upd(p=>p.tasks=p.tasks.filter(t=>t.id!==d.del));return}
+view.addEventListener('click',async e=>{const im=e.target.closest('img[data-pv]');if(im){const r=PH.find(x=>x.id===im.dataset.pv);if(r){$('#pvI').src=r.url;$('#pvI').alt=r.label;$('#pvC').textContent=`${r.label} · ${r.date}`;$('#pv').classList.add('open');$('#pvX').focus()}return}
+  const b=e.target.closest('button');if(!b)return;
+  if(b.dataset.phd){const k=b.dataset.phd;await delPhotos(r=>r.id===k);render();return}const id=b.id,d=b.dataset,p=P();
+  if(d.del){await delPhotos(r=>r.task===d.del&&r.proj===S.cur);upd(p=>p.tasks=p.tasks.filter(t=>t.id!==d.del));return}
   if(d.dsrc){S.sources=S.sources.filter(s=>s.id!==d.dsrc);save();render();return}
   if(d.dlog!==undefined){upd(p=>p.trans.logs.splice(+d.dlog,1));return}
   if(id==='addT'){const n=$('#nt').value.trim();if(!n)return toast('작업 이름을 적으세요');upd(p=>p.tasks.push({id:uid(),name:n,desc:$('#nd').value,obsQ:[],obsA:'',judgeQ:null,ans:{},jdraft:null,conc:'',concWhy:'',fact:{ok:false,note:'',date:''}}));return}
@@ -517,14 +557,15 @@ view.addEventListener('click',async e=>{const b=e.target.closest('button');if(!b
   if(id==='cpG'){try{await navigator.clipboard.writeText(JSON.stringify(govRecord(p),null,1));toast('복사했습니다')}catch(e){toast('복사하지 못했습니다')}return}
   if(id==='dlG'){saveFile('과정기록_비식별.json',JSON.stringify(govRecord(p),null,1));return}
 });
-async function saveFile(name,data){let dl=null;try{dl=await claude.use('downloads')}catch(e){}
+async function saveFile(name,data){let dl=null;try{dl=window.claude?await claude.use('downloads'):null}catch(e){}
   if(!dl){try{const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([data],{type:'application/json'}));a.download=name;document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(a.href),1000);toast('저장했습니다')}catch(e){try{await navigator.clipboard.writeText(data);toast('파일 저장을 쓸 수 없어 클립보드로 복사했습니다')}catch(x){toast('저장하지 못했습니다')}}return}
   try{await dl.save({filename:name,data});toast('저장했습니다')}catch(e){toast('저장이 취소되었습니다')}}
 $('#exp').onclick=()=>saveFile('AI도우미_작업파일_'+today()+'.json',JSON.stringify(S));
 $('#impB').onclick=()=>$('#imp').click();
 $('#imp').onchange=async e=>{try{const o=JSON.parse(await e.target.files[0].text());if(!o.projects)throw 0;S=o;save();render();toast('불러왔습니다')}catch(x){toast('작업 파일이 아닙니다')}};
-let rs=0;$('#reset').onclick=e=>{if(!rs){rs=1;e.target.textContent='한 번 더 누르면 모든 작업이 지워집니다';setTimeout(()=>{rs=0;e.target.textContent='예시로 초기화'},4000);return}S=sample();save();rs=0;e.target.textContent='예시로 초기화';render()};
-addEventListener('keydown',e=>{if(e.key==='Escape'&&$('#modal').classList.contains('open'))$('#mNo').click()});
+let rs=0;$('#reset').onclick=e=>{if(!rs){rs=1;e.target.textContent='한 번 더 누르면 모든 작업이 지워집니다';setTimeout(()=>{rs=0;e.target.textContent='예시로 초기화'},4000);return}delPhotos(()=>true);S=sample();save();rs=0;e.target.textContent='예시로 초기화';render()};
+addEventListener('keydown',e=>{if(e.key==='Escape'){if($('#modal').classList.contains('open'))$('#mNo').click();$('#pv').classList.remove('open')}});
+$('#pvX').onclick=()=>$('#pv').classList.remove('open');$('#pv').onclick=e=>{if(e.target.id==='pv')$('#pv').classList.remove('open')};
 render();
 }
 </script>
