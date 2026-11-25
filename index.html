@@ -192,7 +192,7 @@ const sample=()=>({
     jdraft:{field:'생산 계획',rep:'아니오',hard:'예',data:'추가 수집 필요',conc:'다음 단계 후보',why:'숙련자 의존도가 높아 가치가 크지만 교체 이력이 없어 지금은 학습할 데이터가 없습니다.'},
     conc:'다음 단계 후보',concWhy:'교체 이력을 3개월 쌓은 뒤 다시 판별',fact:{ok:true,note:'원료 건조 시간도 순서에 영향을 줌',date:'2026-11-14'}})],
   design:{task:'t1',pick:'흑점 판정만 먼저 시범: 카메라 1대 + 조명으로 흑점 의심품을 골라내고 최종 판정은 작업자가 함',expert:{ok:true,note:'처음부터 완전 자동 판정 말고 의심품 선별로 시작하는 것이 맞음. 조명 조건을 먼저 고정할 것'},
-   draft:{cases:[{text:'중소 사출 업체가 카메라 2대와 조명으로 외관 검사 일부를 자동화함. 초기에는 의심품 선별 용도로 운영',src:'S1'},{text:'대형 업체의 다중 카메라 검사 라인 사례',src:'S9'}],
+   draft:{cases:[{text:'중소 사출 업체가 카메라 2대와 조명으로 외관 검사 일부를 자동화함. 초기에는 의심품 선별 용도로 운영',src:'S1'}],
     data:['흑점·미성형·양품 사진 (같은 조명, 같은 각도)','불량 판정 기준 문서 (흑점 크기 기준 포함)','라인 속도와 제품 1개당 검사 시간','현재 불량 유출 건수 기록'],
     programs:[{text:'스마트공장 구축 지원사업으로 비전 검사 장비 도입비 일부 지원 가능성 검토',src:'S2'}],
     frame:[{name:'현재 검사 인건비',unit:'원/년',desc:'작업 시간 × 인원 × 시간당 인건비 × 근무일'},{name:'절감률',unit:'%',desc:'AI 선별로 줄어드는 검사 시간의 비율'},{name:'도입비',unit:'원',desc:'카메라·조명·소프트웨어'},{name:'연 유지비',unit:'원/년',desc:'유지보수·재학습'},{name:'유출 불량 감소',unit:'건/년',desc:'클레임 비용은 별도로 추정'}],
@@ -395,15 +395,15 @@ V.judge=p=>`<h2>판별</h2><p class="note">AI는 네 기준별 질문을 내고 
 
 V.design=p=>{const d=p.design,cands=p.tasks.filter(t=>t.conc==='AI 시범 후보'||t.conc==='다음 단계 후보'),r=sim(p),dr=d.draft;
  const srcIds=new Set(S.sources.map(s=>s.id));
- const cite=it=>srcIds.has(it.src)?`<span class="tag t-pc">${esc(it.src)}</span>`:`<span class="tag t-ex">출처 없음 · 사용 불가</span>`;
+ const ok=it=>srcIds.has(it.src); // 자료집 출처가 없는 사례·지원사업은 화면에 내지 않음
  return`<h2>구상</h2><p class="note">AI가 자료집에서 사례·필요 데이터·지원사업을 찾고 시뮬레이션 틀을 설계합니다. 사례와 숫자는 자료집 출처가 있어야 씁니다. 학생이 후보를 고르고 전문가가 검토합니다.</p>
  <div class="cols"><div class="col aiC"><span class="tag t-ai">AI가 하는 일</span>
   <label for="dT">구상할 작업 (판별 결과 후보만)</label><select id="dT"><option value="">선택</option>${cands.map(t=>`<option value="${t.id}" ${d.task===t.id?'selected':''}>${esc(t.name)} · ${esc(t.conc)}</option>`).join('')}</select>
   ${cands.length?'':'<p class="warn">판별에서 후보로 정한 작업이 없습니다. "AI 불필요"도 결론이며, 그 경우 구상 없이 전환 기록으로 가면 됩니다.</p>'}
   <div class="row" style="margin-top:10px">${aiBtn('aiD','사례·데이터·지원사업·틀 초안 받기')}</div>
-  ${dr?`<h3 style="margin-top:14px">사례</h3>${(dr.cases||[]).map(c=>`<div class="draft">${esc(c.text)} ${cite(c)}</div>`).join('')}
+  ${dr?`<h3 style="margin-top:14px">사례</h3>${(dr.cases||[]).filter(ok).map(c=>`<div class="draft">${esc(c.text)}</div>`).join('')}
   <h3>필요한 데이터</h3><div class="draft">${(dr.data||[]).map(x=>'· '+esc(x)).join('\n')}</div>
-  <h3>지원사업</h3>${(dr.programs||[]).map(c=>`<div class="draft">${esc(c.text)} ${cite(c)}</div>`).join('')}
+  <h3>지원사업</h3>${(dr.programs||[]).filter(ok).map(c=>`<div class="draft">${esc(c.text)}</div>`).join('')}
   <h3>시뮬레이션 틀 (숫자 없음)</h3><div class="draft">${(dr.frame||[]).map(v=>`· ${esc(v.name)} (${esc(v.unit)}): ${esc(v.desc)}`).join('\n')}\n${esc(dr.formula||'')}</div>`:''}
   <h3 style="margin-top:16px">자료집 <span class="note">— 공개 자료만. AI에 함께 보냅니다</span></h3>
   ${S.sources.map(s=>`<div class="card"><b>${esc(s.id)} · ${esc(s.title)}</b><br><span class="note">${esc(s.src)}</span><br>${esc(s.body)} <button class="ghost" data-dsrc="${s.id}">삭제</button></div>`).join('')}
