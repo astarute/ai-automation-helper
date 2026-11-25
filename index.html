@@ -296,9 +296,9 @@ let PH=[],phDB=null,phMem=false;const noPerson={};
 const LABELS=['양품','긁힘','미성형','흑점','은줄','변형','기타'];
 function openDB(){return new Promise((res,rej)=>{try{const r=indexedDB.open('aiPlatPhotos',1);r.onupgradeneeded=()=>r.result.createObjectStore('p',{keyPath:'id'});r.onsuccess=()=>res(r.result);r.onerror=()=>rej(r.error)}catch(e){rej(e)}})}
 function tx(mode,fn){return new Promise((res,rej)=>{if(!phDB)return res(null);try{const t=phDB.transaction('p',mode),r=fn(t.objectStore('p'));t.oncomplete=()=>res(r?.result);t.onerror=()=>rej(t.error)}catch(e){rej(e)}})}
-(async()=>{await null;try{phDB=await openDB();const rows=await tx('readonly',st=>st.getAll());PH=(rows||[]).map(r=>({...r,url:URL.createObjectURL(r.blob)}))}catch(e){phDB=null;phMem=true}await seedDemo();render()})();
+(async()=>{await null;try{phDB=await openDB();const rows=await tx('readonly',st=>st.getAll());PH=(rows||[]).map(r=>({...r,url:URL.createObjectURL(r.blob)}))}catch(e){phDB=null;phMem=true}await delPhotos(r=>r.id==='demo-conveyor');await seedDemo();render()})();
 /* 시연용 예시 그림: 처음 한 번만 외관 검사(t1)에 넣음. 실제 사진이 아니라 그린 그림 */
-const DEMO=[['conveyor','컨베이어 장면 (예시 그림)'],['good','양품 (예시 그림)'],['speck','흑점 (예시 그림)'],['scratch','긁힘 (예시 그림)'],['short','미성형 (예시 그림)']];
+const DEMO=[['good','양품 (예시 그림)'],['speck','흑점 (예시 그림)'],['scratch','긁힘 (예시 그림)'],['short','미성형 (예시 그림)']];
 async function seedDemo(force){
   let done=false;try{done=localStorage.getItem('aiPlat.demoPh')==='1'}catch(e){}
   if(done&&!force)return;const p=S.projects.find(x=>x.id==='p1');if(!p||!p.tasks.some(t=>t.id==='t1'))return;
