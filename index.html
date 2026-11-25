@@ -33,7 +33,7 @@ button:hover{border-color:var(--ink)}button:disabled{opacity:.45;cursor:not-allo
 .hum{background:var(--amber);border-color:var(--amber);color:#14181c}
 .ghost{border-color:transparent;background:none;color:var(--mute)}
 label{display:block;font-size:14px;color:var(--mute);margin:10px 0 4px}
-label.ck{display:flex;gap:10px;align-items:center;color:var(--ink);font-size:15px;margin:8px 0}
+label.ck{display:flex;gap:10px;align-items:center;color:var(--ink);font-size:15px;margin:8px 0}td label.ck{white-space:nowrap}
 /* 공정 라인 */
 .line{position:relative;display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:0;margin-top:22px}
 .line::before{content:"";position:absolute;left:8%;right:8%;top:21px;height:6px;border-radius:3px;background:var(--line)}
@@ -170,7 +170,7 @@ const sample=()=>({
  committee:{c1:true,c2:true,s1:true,s2:true},
  projects:[{id:'p1',company:'c1',student:'s1',mentor:'박숙련 반장',
   tasks:[
-   T('t1','사출품 외관 검사','성형 직후 제품을 작업자가 조명 아래서 돌려 보며 긁힘·미성형·흑점을 찾는다. 하루 8시간, 3명.',{
+   T('t1','사출품 외관 검사','성형 직후 제품을 작업자가 조명 아래서 돌려 보며 긁힘·미성형·흑점을 찾는다. 하루 8시간, 3명.',{photo:true,
     obsQ:['불량 유형별로 하루에 몇 개쯤 나오는가?','작업자마다 불량 판정이 다른 경우가 있는가?','제품 한 개를 검사하는 데 몇 초 걸리는가?','불량품은 따로 모아 두는가, 바로 버리는가?','고객사가 클레임을 거는 불량은 주로 어떤 유형인가?'],
     obsA:'제품 1개당 약 6초. 흑점이 가장 많고 다음이 미성형. 작업자 간 흑점 판정이 엇갈림(크기 기준이 머릿속에만 있음). 불량품은 박스에 모아 주 1회 폐기 — 사진 촬영 가능. 고객 클레임 대부분이 흑점 유출.',
     judgeQ:{field:['이 작업의 핵심은 눈으로 보고 판단하는 일인가, 숫자를 예측하는 일인가?','검사 결과가 다음 공정 조건에 쓰이는가?'],rep:['같은 동작과 판단이 하루에 몇 번 반복되는가?','예외 상황은 얼마나 자주 생기는가?'],hard:['8시간 내내 같은 집중도를 유지할 수 있는가?','작은 흑점을 사람이 놓치는 경우가 있는가?'],data:['불량품과 양품 사진을 지금 찍을 수 있는가?','불량 판정 기준을 글로 적을 수 있는가?']},
@@ -222,6 +222,7 @@ const sample=()=>({
 let S;
 try{S=JSON.parse(localStorage.getItem('aiPlat.v2'))}catch(e){}
 if(!S||!S.projects)S=sample();
+for(const p of S.projects)for(const t of p.tasks)if(t.photo===undefined)t.photo=/외관\s*검사/.test(t.name);
 const save=()=>{try{localStorage.setItem('aiPlat.v2',JSON.stringify(S))}catch(e){}};
 const P=()=>S.projects.find(p=>p.id===S.cur)||S.projects[0];
 const comp=id=>S.companies.find(c=>c.id===id)||{};
@@ -320,25 +321,17 @@ function photoBox(t){const list=photosOf(t.id),ok=noPerson[t.id];
 
 const V={};
 V.select=()=>{
-  const sc=S.scores,cm=S.committee;
-  const cRows=S.companies.map(c=>{const s=sc[c.id];const tot=s?RUBRIC.reduce((a,[k])=>a+(+s[k]||0),0):'';
-    return`<tr><td><b>${esc(c.name)}</b><br><span class="note">${esc(c.ind)}</span></td><td>${esc(c.text)}</td>
-    <td class="n">${s?`${tot}점`:'—'}</td><td>${s?`<div class="note">${RUBRIC.map(([k,n,m])=>`${n} ${esc(s[k])}/${m}`).join(' · ')}</div><div>${esc(s.why)}</div>`:''}</td>
-    <td><label class="ck"><input type="checkbox" data-cm="${c.id}" ${cm[c.id]?'checked':''}>선정</label></td></tr>`}).join('');
-  const sRows=S.students.map(c=>{const s=sc[c.id];
-    return`<tr><td><b>${esc(c.name)}</b><br><span class="note">${esc(c.major)}</span></td><td>${esc(c.text)}</td>
-    <td class="n">${s?`+${esc(s.bonus)}`:'—'}</td><td>${s?esc(s.why):''}</td>
-    <td><label class="ck"><input type="checkbox" data-cm="${c.id}" ${cm[c.id]?'checked':''}>선정</label></td></tr>`}).join('');
-  const recs=(S.matchRec||[]).map((m,i)=>`<div class="draft">${esc(comp(m.company).name||m.company)} ↔ ${esc(stu(m.student).name||m.student)}\n${esc(m.why)}</div>`).join('');
-  return`<h2>선정</h2><p class="note">신청서 점수와 AI 전환 구상 가산점은 AI 초안입니다. 최종 선정과 매칭은 심사위원회가 정합니다. AI에는 이름 대신 ID만 갑니다.</p>
-  <div class="cols"><div class="col aiC"><span class="tag t-ai">AI가 하는 일</span>
-   <h3 style="margin-top:10px">기업 신청서 <span class="note">(배점: ${RUBRIC.map(r=>r[1]+' '+r[2]).join(', ')} — 예시 배점)</span></h3>
-   <div class="scroll"><table class="stack"><thead><tr><th>기업</th><th>신청 내용</th><th class="n">총점</th><th>근거</th><th>위원회</th></tr></thead><tbody>${cRows}</tbody></table></div>
-   <h3 style="margin-top:18px">학생 지원서 <span class="note">(AI 전환 구상 가산점 0–5)</span></h3>
-   <div class="scroll"><table class="stack"><thead><tr><th>학생</th><th>AI 전환 구상</th><th class="n">가산점</th><th>근거</th><th>위원회</th></tr></thead><tbody>${sRows}</tbody></table></div>
-   <div class="row" style="margin-top:12px">${aiBtn('aiSel','점수·가산점·매칭 초안 받기')}<button id="addC">기업 추가</button><button id="addS">학생 추가</button></div>
+  const cm=S.committee,ck=c=>`<label class="ck"><input type="checkbox" data-cm="${c.id}" ${cm[c.id]?'checked':''}>선정</label>`;
+  const cRows=S.companies.map(c=>`<tr><td><b>${esc(c.name)}</b><br><span class="note">${esc(c.ind)}</span></td><td>${esc(c.text)}</td><td>${ck(c)}</td></tr>`).join('');
+  const sRows=S.students.map(c=>`<tr><td><b>${esc(c.name)}</b><br><span class="note">${esc(c.major)}</span></td><td>${esc(c.text)}</td><td>${ck(c)}</td></tr>`).join('');
+  return`<h2>선정</h2><p class="note">선정은 AI를 쓰지 않습니다. 신청서 검토, 최종 선정, 기업–학생 매칭 모두 심사위원회가 정하고 여기에는 결과만 기록합니다.</p>
+  <div class="cols"><div class="col huC"><span class="tag t-hu">사람이 정하는 것 · 심사위원회</span>
+   <h3 style="margin-top:10px">기업 신청서</h3>
+   <div class="scroll"><table class="stack"><thead><tr><th>기업</th><th>신청 내용</th><th>위원회</th></tr></thead><tbody>${cRows}</tbody></table></div>
+   <h3 style="margin-top:18px">학생 지원서</h3>
+   <div class="scroll"><table class="stack"><thead><tr><th>학생</th><th>AI 전환 구상</th><th>위원회</th></tr></thead><tbody>${sRows}</tbody></table></div>
+   <div class="row" style="margin-top:12px"><button id="addC">기업 추가</button><button id="addS">학생 추가</button></div>
    <div id="addForm"></div>
-   ${recs?`<h3 style="margin-top:14px">매칭 추천</h3>${recs}`:''}
   </div>
   <div class="col huC"><span class="tag t-hu">사람이 정하는 것 · 심사위원회</span>
    <h3 style="margin-top:10px">최종 매칭 확정</h3>
@@ -356,11 +349,12 @@ V.observe=p=>`<h2>관찰</h2><p class="note">현장 작업마다 AI가 확인할
    ${t.obsQ.length?`<div class="draft">${t.obsQ.map((q,i)=>`${i+1}. ${esc(q)}`).join('\n')}</div>`:''}
    <div class="row">${aiBtn('oq-'+t.id,'확인 질문 받기')}<button class="ghost" data-del="${t.id}">작업 삭제</button></div>
    <label for="oa-${t.id}">관찰 기록 <span class="note">(AI 질문에 쓸 때는 비식별 처리 후 확인을 거쳐 보냄)</span></label><textarea id="oa-${t.id}" data-obs="${t.id}">${esc(t.obsA)}</textarea>
-   ${photoBox(t)}</div>`).join('')}
+   ${t.photo||photosOf(t.id).length?photoBox(t):''}</div>`).join('')}
  <datalist id="phLabels">${LABELS.map(l=>`<option value="${l}">`).join('')}</datalist>
  </div><div class="col"><span class="tag t-pc">작업 추가</span>
   <label for="nt">작업 이름</label><input id="nt" placeholder="예: 포장 수량 확인">
   <label for="nd">작업 설명</label><textarea id="nd" placeholder="누가, 얼마나 자주, 어떻게 하는지"></textarea>
+  <label class="ck"><input type="checkbox" id="nph">제품 사진이 필요한 작업 (예: 외관 검사)</label>
   <div class="row" style="margin-top:10px"><button id="addT">작업 추가</button></div>
   <p class="note">설명에 적은 회사명·고객사명·사람 이름·숫자는 AI로 보낼 때 자동으로 가려집니다. 가릴 단어는 <a href="#data">데이터 흐름</a>에서 관리합니다.</p>
  </div></div>`;
@@ -520,7 +514,7 @@ view.addEventListener('click',async e=>{const im=e.target.closest('img[data-pv]'
   if(d.del){await delPhotos(r=>r.task===d.del&&r.proj===S.cur);upd(p=>p.tasks=p.tasks.filter(t=>t.id!==d.del));return}
   if(d.dsrc){S.sources=S.sources.filter(s=>s.id!==d.dsrc);save();render();return}
   if(d.dlog!==undefined){upd(p=>p.trans.logs.splice(+d.dlog,1));return}
-  if(id==='addT'){const n=$('#nt').value.trim();if(!n)return toast('작업 이름을 적으세요');upd(p=>p.tasks.push({id:uid(),name:n,desc:$('#nd').value,obsQ:[],obsA:'',judgeQ:null,ans:{},jdraft:null,conc:'',concWhy:'',fact:{ok:false,note:'',date:''}}));return}
+  if(id==='addT'){const n=$('#nt').value.trim();if(!n)return toast('작업 이름을 적으세요');upd(p=>p.tasks.push({id:uid(),photo:$('#nph').checked,name:n,desc:$('#nd').value,obsQ:[],obsA:'',judgeQ:null,ans:{},jdraft:null,conc:'',concWhy:'',fact:{ok:false,note:'',date:''}}));return}
   if(id==='addSrc'){const t=$('#sT').value.trim();if(!t)return toast('제목을 적으세요');S.sources.push({id:'S'+(S.sources.length+1)+uid().slice(0,2),title:t,src:$('#sS').value,body:$('#sB').value});save();render();return}
   if(id==='addL'){const t=$('#lT').value.trim();if(!t)return;upd(p=>p.trans.logs.push({date:$('#lD').value,text:t}));return}
   if(id==='addC'||id==='addS'){const c=id==='addC';$('#addForm').innerHTML=`<div class="card"><label>${c?'기업명':'이름'}</label><input id="fA"><label>${c?'업종':'전공'}</label><input id="fB"><label>${c?'신청 내용':'AI 전환 구상'}</label><textarea id="fC"></textarea><button id="${c?'svC':'svS'}" style="margin-top:8px">저장</button></div>`;return}
@@ -529,10 +523,6 @@ view.addEventListener('click',async e=>{const im=e.target.closest('img[data-pv]'
     const np={...structuredClone(sample().projects[0]),id:uid(),company:c,student:s,mentor:$('#mM').value,tasks:[]};
     np.trans={logs:[],summary:'',result:'',start:'',end:'',consent:false,extra:false};np.brief={draft:null,decision:'',date:'',note:''};np.design={task:'',draft:null,pick:'',expert:{ok:false,note:''},sim:{hours:8,people:1,wage:15000,days:250,save:50,capex:0,opex:0}};
     S.projects.push(np);S.cur=np.id;save();toast('매칭을 확정했습니다');render();return}
-  if(id==='aiSel'){
-    const r=await ai('선정 점수·가산점·매칭 초안',`기업 신청서마다 ${RUBRIC.map(([k,n,m])=>`${k}(${n}, 0–${m})`).join(', ')} 점수와 한두 문장 근거(why), 학생마다 AI 전환 구상 가산점 bonus(0–5 정수)와 근거(why), 기업–학생 매칭 추천을 내세요. 형식: {"companies":[{"id":"","need":0,"ready":0,"will":0,"spread":0,"why":""}],"students":[{"id":"","bonus":0,"why":""}],"matches":[{"company":"","student":"","why":""}]}`,
-      {기업:S.companies.map(c=>({id:c.id,업종:c.ind,신청내용:c.text})),학생:S.students.map(s=>({id:s.id,전공:s.major,구상:s.text}))},b);
-    if(r){(r.companies||[]).forEach(c=>S.scores[c.id]=c);(r.students||[]).forEach(s=>S.scores[s.id]=s);S.matchRec=r.matches||[];save();render()}return}
   if(id.startsWith('oq-')){const t=p.tasks.find(x=>x.id===id.slice(3));
     const r=await ai('관찰 질문',`현장 관찰 때 학생이 확인할 구체적 질문 5개. 형식: {"questions":["",...]}`,{작업:t.name,설명:t.desc},b);
     if(r)upd(()=>t.obsQ=r.questions||[]);return}
