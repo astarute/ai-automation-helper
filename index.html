@@ -483,7 +483,8 @@ function render(){
   cur=[...STAGES.map(s=>s.k),'data'].includes(h)?h:cur;
   $('#proj').innerHTML=S.projects.map(x=>`<option value="${x.id}" ${x.id===S.cur?'selected':''}>${esc(comp(x.company).name)} · ${esc(stu(x.student).name)}</option>`).join('');
   const done=STAGES.filter(s=>st[s.k]).length;
-  $('#line').innerHTML=`<span class="prog" style="width:${Math.max(0,STAGES.findLastIndex(s=>st[s.k]))*84/5}%"></span>`+STAGES.map((s,i)=>`<${s.k==='select'?'div':'a'} ${s.k==='select'?'aria-disabled="true" title="심사위원회 확정 완료"':`href="#${s.k}"`} class="st ${st[s.k]?'done':''} ${s.k==='select'?'fixed':''} ${cur===s.k?'on':''}" style="color:inherit;text-decoration:none" aria-current="${cur===s.k}"><span class="dot">${s.k==='select'?'<svg viewBox="0 0 24 24" aria-label="완료" fill="none" stroke="currentColor" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>':i+1}</span><b>${s.n}</b><small>${s.d}</small></${s.k==='select'?'div':'a'}>`).join('');
+  const ci=Math.max(1,STAGES.findIndex(s=>s.k===cur)),CHK='<svg viewBox="0 0 24 24" aria-label="완료" fill="none" stroke="currentColor" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>';
+  $('#line').innerHTML=`<span class="prog" style="width:${ci*84/5}%"></span>`+STAGES.map((s,i)=>`<div class="st ${i<ci?'fixed':''} ${i===ci?'on':''}" ${i===ci?'aria-current="step"':''}><span class="dot">${i<ci?CHK:i+1}</span><b>${s.n}</b><small>${s.d}</small></div>`).join('');
   $('#view').innerHTML=p||cur==='select'||cur==='data'?V[cur](p):'<p>매칭된 과제가 없습니다. <a href="#select">선정</a>에서 매칭을 확정하세요.</p>';
   const order=['observe','judge','design','brief','transition'],ix=order.indexOf(cur),h2=$('#view h2');
   if(ix>=0&&h2){const name=k=>STAGES.find(s=>s.k===k).n,prev=order[ix-1],next=order[ix+1],head=document.createElement('div');head.className='stagehead';
