@@ -75,6 +75,7 @@ pre{white-space:pre-wrap;background:var(--panel);padding:12px;border-radius:6px;
 .phs img{display:block;width:100%;aspect-ratio:1;object-fit:cover;cursor:zoom-in}
 .phs figcaption{padding:6px}.phs input{min-height:36px;padding:4px 6px;font-size:14px}.phs button{min-height:36px;padding:4px 8px;font-size:13px;width:100%;margin-top:4px}
 .filebtn{display:flex;align-items:center;justify-content:center;min-height:44px;margin:0;padding:8px 14px;border:1px solid var(--line);border-radius:6px;background:var(--bg);color:var(--ink);font-size:15px;font-weight:500;cursor:pointer}.filebtn:hover{border-color:var(--ink)}.vh{position:absolute;width:1px;height:1px;opacity:0;overflow:hidden}.vh:focus-visible+*,.filebtn:focus-within{outline:3px solid var(--blue)}
+.stagehead{display:flex;flex-wrap:wrap;gap:10px 16px;align-items:center;justify-content:space-between;margin-bottom:6px}.stagehead h2{margin:0}.pn{display:flex;gap:8px}.pn button{min-width:96px}.pn .nx:not(:disabled){background:var(--ink);border-color:var(--ink);color:var(--bg)}
 .pcbox{border:2px solid var(--green);background:var(--greenBg);border-radius:8px;padding:12px;margin-top:12px}
 #pv .box{border-top-color:var(--green);max-width:1000px}#pv img{display:block;max-width:100%;max-height:72vh;margin:0 auto;border-radius:6px}
 .toast{position:fixed;bottom:16px;left:50%;transform:translateX(-50%);background:var(--ink);color:var(--bg);padding:10px 16px;border-radius:8px;font-size:15px;opacity:0;transition:opacity .2s;pointer-events:none;z-index:10}
@@ -484,6 +485,10 @@ function render(){
   const done=STAGES.filter(s=>st[s.k]).length;
   $('#line').innerHTML=`<span class="prog" style="width:${Math.max(0,STAGES.findLastIndex(s=>st[s.k]))*84/5}%"></span>`+STAGES.map((s,i)=>`<${s.k==='select'?'div':'a'} ${s.k==='select'?'aria-disabled="true" title="심사위원회 확정 완료"':`href="#${s.k}"`} class="st ${st[s.k]?'done':''} ${s.k==='select'?'fixed':''} ${cur===s.k?'on':''}" style="color:inherit;text-decoration:none" aria-current="${cur===s.k}"><span class="dot">${s.k==='select'?'<svg viewBox="0 0 24 24" aria-label="완료" fill="none" stroke="currentColor" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>':i+1}</span><b>${s.n}</b><small>${s.d}</small></${s.k==='select'?'div':'a'}>`).join('');
   $('#view').innerHTML=p||cur==='select'||cur==='data'?V[cur](p):'<p>매칭된 과제가 없습니다. <a href="#select">선정</a>에서 매칭을 확정하세요.</p>';
+  const order=['observe','judge','design','brief','transition'],ix=order.indexOf(cur),h2=$('#view h2');
+  if(ix>=0&&h2){const name=k=>STAGES.find(s=>s.k===k).n,prev=order[ix-1],next=order[ix+1],head=document.createElement('div');head.className='stagehead';
+    head.innerHTML=`<nav class="pn" aria-label="단계 이동"><button data-go="${prev||''}" ${prev?`title="이전 단계: ${name(prev)}"`:'disabled'}>← 이전</button><button class="nx" data-go="${next||''}" ${next?`title="다음 단계: ${name(next)}"`:'disabled'}>다음 →</button></nav>`;
+    h2.replaceWith(head);head.prepend(h2)}
   if(cur==='data')runTest();
 }
 function runTest(){const m=mask($('#tst')?.value);if($('#tstO'))$('#tstO').textContent=m.t}
@@ -515,7 +520,8 @@ view.addEventListener('change',e=>{const d=e.target.dataset,el=e.target,id=el.id
   const map={dT:p=>p.design.task=el.value,eOk:p=>p.design.expert.ok=el.checked,bD:p=>{p.brief.decision=el.value;p.brief.date=el.value?today():''},
    tS:p=>p.trans.start=el.value,tE:p=>p.trans.end=el.value,tR:p=>p.trans.result=el.value,cs:p=>p.trans.consent=el.checked,ex:p=>p.trans.extra=el.checked};
   if(map[id])upd(map[id])});
-view.addEventListener('click',async e=>{const im=e.target.closest('img[data-pv]');if(im){const r=PH.find(x=>x.id===im.dataset.pv);if(r){$('#pvI').src=r.url;$('#pvI').alt=r.label;$('#pvC').textContent=`${r.label} · ${r.date}`;$('#pv').classList.add('open');$('#pvX').focus()}return}
+view.addEventListener('click',async e=>{const go=e.target.closest('button[data-go]');if(go){if(go.dataset.go){location.hash=go.dataset.go;scrollTo({top:0})}return}
+  const im=e.target.closest('img[data-pv]');if(im){const r=PH.find(x=>x.id===im.dataset.pv);if(r){$('#pvI').src=r.url;$('#pvI').alt=r.label;$('#pvC').textContent=`${r.label} · ${r.date}`;$('#pv').classList.add('open');$('#pvX').focus()}return}
   const b=e.target.closest('button');if(!b)return;
   if(b.dataset.phd){const k=b.dataset.phd;await delPhotos(r=>r.id===k);render();return}const id=b.id,d=b.dataset,p=P();
   if(d.del){await delPhotos(r=>r.task===d.del&&r.proj===S.cur);upd(p=>p.tasks=p.tasks.filter(t=>t.id!==d.del));return}
