@@ -74,6 +74,7 @@ pre{white-space:pre-wrap;background:var(--panel);padding:12px;border-radius:6px;
 .phs figure{margin:0;background:var(--bg);border:1px solid var(--line);border-radius:6px;overflow:hidden}
 .phs img{display:block;width:100%;aspect-ratio:1;object-fit:cover;cursor:zoom-in}
 .phs figcaption{padding:6px}.phs input{min-height:36px;padding:4px 6px;font-size:14px}.phs button{min-height:36px;padding:4px 8px;font-size:13px;width:100%;margin-top:4px}
+.filebtn{display:flex;align-items:center;justify-content:center;min-height:44px;margin:0;padding:8px 14px;border:1px solid var(--line);border-radius:6px;background:var(--bg);color:var(--ink);font-size:15px;font-weight:500;cursor:pointer}.filebtn:hover{border-color:var(--ink)}.vh{position:absolute;width:1px;height:1px;opacity:0;overflow:hidden}.vh:focus-visible+*,.filebtn:focus-within{outline:3px solid var(--blue)}
 .pcbox{border:2px solid var(--green);background:var(--greenBg);border-radius:8px;padding:12px;margin-top:12px}
 #pv .box{border-top-color:var(--green);max-width:1000px}#pv img{display:block;max-width:100%;max-height:72vh;margin:0 auto;border-radius:6px}
 .toast{position:fixed;bottom:16px;left:50%;transform:translateX(-50%);background:var(--ink);color:var(--bg);padding:10px 16px;border-radius:8px;font-size:15px;opacity:0;transition:opacity .2s;pointer-events:none;z-index:10}
@@ -323,7 +324,7 @@ function photoBox(t){const list=photosOf(t.id);
  return`<div class="pcbox"><div class="row" style="justify-content:space-between"><b>제품 사진 ${list.length?`<span class="note">${list.length}장</span>`:''}</b><span class="tag t-pc">회사 PC에만 저장 · AI로 보내지 않음</span></div>
   ${phMem?'<p class="warn">이 브라우저는 사진을 오래 저장할 수 없습니다. 새로고침하면 사라집니다.</p>':''}
   <div class="grid2"><div><label for="pl-${t.id}">분류</label><input id="pl-${t.id}" list="phLabels" placeholder="예: 긁힘, 미성형 등"></div>
-  <div><label for="pf-${t.id}">사진 고르기</label><input type="file" id="pf-${t.id}" data-pf="${t.id}" accept="image/*" multiple></div></div>
+  <div><label>이미지</label><label class="filebtn" for="pf-${t.id}">이미지 선택</label><input type="file" class="vh" id="pf-${t.id}" data-pf="${t.id}" accept="image/*" multiple></div></div>
   ${list.length?`<div class="phs">${list.map(r=>`<figure><img src="${r.url}" alt="${esc(r.label)} 사진" data-pv="${r.id}"><figcaption><input aria-label="분류" list="phLabels" data-phl="${r.id}" value="${esc(r.label)}"><span class="note">${esc(r.date)}</span><button class="ghost" data-phd="${r.id}">삭제</button></figcaption></figure>`).join('')}</div>`:'<p class="note" style="margin:8px 0 0">불량 유형별로 양품과 함께 찍어 두면 판별 ④(데이터를 지금 만들 수 있나)의 근거가 됩니다.</p>'}
  </div>`}
 
