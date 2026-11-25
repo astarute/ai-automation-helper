@@ -168,14 +168,14 @@ const sample=()=>({
  committee:{c1:true,c2:true,s1:true,s2:true},
  projects:[{id:'p1',company:'c1',student:'s1',mentor:'박숙련 반장',
   tasks:[
-   T('t1','사출품 외관 검사','성형 직후 제품을 작업자가 조명 아래서 돌려 보며 긁힘·미성형·흑점을 찾는다. 하루 8시간, 3명.',{photo:true,
+   T('t1','사출품 외관 검사','',{photo:true,
     obsQ:['불량 유형별로 하루에 몇 개쯤 나오는가?','작업자마다 불량 판정이 다른 경우가 있는가?','제품 한 개를 검사하는 데 몇 초 걸리는가?','불량품은 따로 모아 두는가, 바로 버리는가?','고객사가 클레임을 거는 불량은 주로 어떤 유형인가?'],
     obsA:'제품 1개당 약 6초. 흑점이 가장 많고 다음이 미성형. 작업자 간 흑점 판정이 엇갈림(크기 기준이 머릿속에만 있음). 불량품은 박스에 모아 주 1회 폐기 — 사진 촬영 가능. 고객 클레임 대부분이 흑점 유출.',
     judgeQ:{field:['이 작업의 핵심은 눈으로 보고 판단하는 일인가, 숫자를 예측하는 일인가?','검사 결과가 다음 공정 조건에 쓰이는가?'],rep:['같은 동작과 판단이 하루에 몇 번 반복되는가?','예외 상황은 얼마나 자주 생기는가?'],hard:['8시간 내내 같은 집중도를 유지할 수 있는가?','작은 흑점을 사람이 놓치는 경우가 있는가?'],data:['불량품과 양품 사진을 지금 찍을 수 있는가?','불량 판정 기준을 글로 적을 수 있는가?']},
     ans:{field:'비전 검사',rep:'예',hard:'예',data:'지금 가능',note:'① 눈으로 보고 판정하는 일 → 비전 검사\n② 6초마다 같은 동작 반복, 예외 적음\n③ 오후가 되면 작은 흑점을 놓친다고 작업자가 말함\n④ 폐기 전 불량품을 모아 두므로 사진을 바로 찍을 수 있음. 흑점 크기 기준은 반장과 함께 글로 정리 가능'},
     jdraft:{field:'비전 검사',rep:'예',hard:'예',data:'지금 가능',conc:'AI 시범 후보',why:'반복적인 육안 판정이고 피로로 누락이 생깁니다. 모아 둔 불량품으로 학습용 사진을 바로 만들 수 있습니다.'},
     conc:'AI 시범 후보',concWhy:'흑점 판정부터 좁혀서 시범. 데이터를 바로 만들 수 있음',fact:{ok:true,note:'흑점 외에 은줄 불량도 가끔 있음',date:'2026-11-12'}}),
-   T('t2','작업일지 수기 작성','교대마다 생산 수량, 불량 수량, 금형 번호를 종이에 적고 사무실에서 엑셀로 다시 입력.',{
+   T('t2','작업일지 수기 작성','',{
     obsQ:['종이에 적는 데 교대당 몇 분 걸리는가?','엑셀 재입력은 누가, 언제 하는가?','잘못 옮겨 적는 경우가 있는가?','이 기록을 누가 어디에 쓰는가?','적는 항목은 매번 같은가?'],
     obsA:'교대당 10분 정도. 사무실 직원이 다음 날 오전에 엑셀로 옮김. 금형 번호를 잘못 옮기는 일이 월 몇 번 있음. 항목은 늘 같음(수량, 불량, 금형 번호).',
     judgeQ:{field:['기록을 옮기는 일인가, 기록에서 무언가를 판단하는 일인가?'],rep:['항목이 매번 같은가?'],hard:['사람이 하기에 어렵거나 위험한 부분이 있는가?'],data:['기록이 이미 표 형태로 있는가?']},
@@ -220,7 +220,7 @@ const sample=()=>({
 let S;
 try{S=JSON.parse(localStorage.getItem('aiPlat.v2'))}catch(e){}
 if(!S||!S.projects)S=sample();
-for(const p of S.projects)for(const t of p.tasks)if(t.photo===undefined)t.photo=/외관\s*검사/.test(t.name);
+for(const p of S.projects)for(const t of p.tasks){if(t.photo===undefined)t.photo=/외관\s*검사/.test(t.name);if(t.desc==='성형 직후 제품을 작업자가 조명 아래서 돌려 보며 긁힘·미성형·흑점을 찾는다. 하루 8시간, 3명.'||t.desc==='교대마다 생산 수량, 불량 수량, 금형 번호를 종이에 적고 사무실에서 엑셀로 다시 입력.')t.desc=''}
 const save=()=>{try{localStorage.setItem('aiPlat.v2',JSON.stringify(S))}catch(e){}};
 const P=()=>S.projects.find(p=>p.id===S.cur)||S.projects[0];
 const comp=id=>S.companies.find(c=>c.id===id)||{};
@@ -292,7 +292,7 @@ function status(p){
 
 /* ---------- 화면 ---------- */
 /* ---------- 제품 사진: 이 브라우저(IndexedDB)에만 저장, AI·정부 기록에는 쓰지 않음 ---------- */
-let PH=[],phDB=null,phMem=false;const noPerson={};
+let PH=[],phDB=null,phMem=false;
 const LABELS=['양품','긁힘','미성형','흑점','은줄','변형','기타'];
 function openDB(){return new Promise((res,rej)=>{try{const r=indexedDB.open('aiPlatPhotos',1);r.onupgradeneeded=()=>r.result.createObjectStore('p',{keyPath:'id'});r.onsuccess=()=>res(r.result);r.onerror=()=>rej(r.error)}catch(e){rej(e)}})}
 function tx(mode,fn){return new Promise((res,rej)=>{if(!phDB)return res(null);try{const t=phDB.transaction('p',mode),r=fn(t.objectStore('p'));t.oncomplete=()=>res(r?.result);t.onerror=()=>rej(t.error)}catch(e){rej(e)}})}
@@ -319,12 +319,11 @@ async function addPhotos(task,files,label){
   if(n)toast(`사진 ${n}장을 이 브라우저에 저장했습니다`);render()}
 async function delPhotos(pred){for(const r of PH.filter(pred)){URL.revokeObjectURL(r.url);try{await tx('readwrite',st=>st.delete(r.id))}catch(e){}}PH=PH.filter(r=>!pred(r))}
 const photosOf=(t)=>PH.filter(r=>r.task===t&&r.proj===S.cur);
-function photoBox(t){const list=photosOf(t.id),ok=noPerson[t.id];
+function photoBox(t){const list=photosOf(t.id);
  return`<div class="pcbox"><div class="row" style="justify-content:space-between"><b>제품 사진 ${list.length?`<span class="note">${list.length}장</span>`:''}</b><span class="tag t-pc">회사 PC에만 저장 · AI로 보내지 않음</span></div>
   ${phMem?'<p class="warn">이 브라우저는 사진을 오래 저장할 수 없습니다. 새로고침하면 사라집니다.</p>':''}
-  <label class="ck"><input type="checkbox" data-np="${t.id}" ${ok?'checked':''}>사진에 작업자·작업 장면이 없습니다 (작업자 촬영 금지)</label>
-  <div class="grid2"><div><label for="pl-${t.id}">분류</label><input id="pl-${t.id}" list="phLabels" placeholder="예: 흑점, 양품"></div>
-  <div><label for="pf-${t.id}">사진 고르기</label><input type="file" id="pf-${t.id}" data-pf="${t.id}" accept="image/*" multiple ${ok?'':'disabled'}></div></div>
+  <div class="grid2"><div><label for="pl-${t.id}">분류</label><input id="pl-${t.id}" list="phLabels" placeholder="예: 긁힘, 미성형 등"></div>
+  <div><label for="pf-${t.id}">사진 고르기</label><input type="file" id="pf-${t.id}" data-pf="${t.id}" accept="image/*" multiple></div></div>
   ${list.length?`<div class="phs">${list.map(r=>`<figure><img src="${r.url}" alt="${esc(r.label)} 사진" data-pv="${r.id}"><figcaption><input aria-label="분류" list="phLabels" data-phl="${r.id}" value="${esc(r.label)}"><span class="note">${esc(r.date)}</span><button class="ghost" data-phd="${r.id}">삭제</button></figcaption></figure>`).join('')}</div>`:'<p class="note" style="margin:8px 0 0">불량 유형별로 양품과 함께 찍어 두면 판별 ④(데이터를 지금 만들 수 있나)의 근거가 됩니다.</p>'}
  </div>`}
 
@@ -354,10 +353,10 @@ V.select=()=>{
 
 V.observe=p=>`<h2>관찰</h2><p class="note">현장 작업마다 AI가 확인할 질문을 냅니다. 학생은 현장에서 본 것을 적습니다. 여기서 정할 것은 없습니다.</p>
  <div class="cols"><div class="col aiC"><span class="tag t-ai">AI가 하는 일</span>
-  ${p.tasks.map(t=>`<div class="card"><h3>${esc(t.name)}</h3><p class="note" style="margin:0">${esc(t.desc)}</p>
+  ${p.tasks.map(t=>`<div class="card"><h3>${esc(t.name)}</h3>${t.desc?`<p class="note" style="margin:0">${esc(t.desc)}</p>`:''}
    ${t.obsQ.length?`<div class="draft">${t.obsQ.map((q,i)=>`${i+1}. ${esc(q)}`).join('\n')}</div>`:''}
    <div class="row">${aiBtn('oq-'+t.id,'확인 질문 받기')}<button class="ghost" data-del="${t.id}">작업 삭제</button></div>
-   <label for="oa-${t.id}">관찰 기록 <span class="note">(AI 질문에 쓸 때는 비식별 처리 후 확인을 거쳐 보냄)</span></label><textarea id="oa-${t.id}" data-obs="${t.id}">${esc(t.obsA)}</textarea>
+   <label for="oa-${t.id}">관찰 기록</label><textarea id="oa-${t.id}" data-obs="${t.id}">${esc(t.obsA)}</textarea>
    ${t.photo||photosOf(t.id).length?photoBox(t):''}</div>`).join('')}
  <datalist id="phLabels">${LABELS.map(l=>`<option value="${l}">`).join('')}</datalist>
  </div><div class="col"><span class="tag t-pc">작업 추가</span>
@@ -506,8 +505,7 @@ view.addEventListener('input',e=>{const d=e.target.dataset,v=e.target.value,p=P(
   else if(e.target.id==='tst')runTest();
   save()});
 view.addEventListener('change',e=>{const d=e.target.dataset,el=e.target,id=el.id;
-  if(d.np){noPerson[d.np]=el.checked;const f=$('#pf-'+d.np);if(f)f.disabled=!el.checked;return}
-  if(d.pf){if(!noPerson[d.pf]){el.value='';return toast('작업자·작업 장면이 없는지 먼저 확인하세요')}addPhotos(d.pf,[...el.files],$('#pl-'+d.pf)?.value.trim());return}
+  if(d.pf){addPhotos(d.pf,[...el.files],$('#pl-'+d.pf)?.value.trim());return}
   if(d.phl){const r=PH.find(x=>x.id===d.phl);if(r){r.label=el.value.trim()||'미분류';const{url,...rec}=r;tx('readwrite',st=>st.put(rec)).catch(()=>{})}return}
   if(d.cm!==undefined){S.committee[d.cm]=el.checked;save();render();return}
   if(d.a){const[t,k]=d.a.split(':');upd(p=>p.tasks.find(x=>x.id===t).ans[k]=el.value);return}
