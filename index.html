@@ -40,7 +40,7 @@ label.ck{display:flex;gap:10px;align-items:center;color:var(--ink);font-size:15p
 .line .prog{position:absolute;left:8%;top:21px;height:6px;border-radius:3px;background:var(--green);transition:width .4s}
 .st{position:relative;display:flex;flex-direction:column;align-items:center;gap:6px;background:none;border:0;padding:0 2px 8px;min-height:0;text-align:center}
 .st .dot{width:48px;height:48px;border-radius:50%;border:6px solid var(--line);background:var(--bg);display:grid;place-items:center;font-weight:700;font-size:15px}
-.st.done .dot{border-color:var(--green)}.st.fixed .dot{background:var(--green);border-color:var(--green);color:#fff}.st.fixed .dot svg{width:24px;height:24px}.st.on .dot{border-color:var(--ink);background:var(--ink);color:var(--bg)}
+.st.done .dot{border-color:var(--green)}.st.fixed{cursor:default}.st.fixed .dot{background:var(--green);border-color:var(--green);color:#fff}.st.fixed .dot svg{width:24px;height:24px}.st.on .dot{border-color:var(--ink);background:var(--ink);color:var(--bg)}
 .st b{font-size:15px}.st small{font-size:13px;color:var(--mute);line-height:1.3}
 .tabs2{display:flex;gap:6px;flex-wrap:wrap;margin-top:12px}
 .tabs2 a{color:var(--mute);text-decoration:none;font-size:14px;padding:10px 12px;border-radius:6px}.tabs2 a.on{color:var(--ink);background:var(--panel)}
@@ -473,7 +473,7 @@ function render(){
   cur=[...STAGES.map(s=>s.k),'data'].includes(h)?h:cur;
   $('#proj').innerHTML=S.projects.map(x=>`<option value="${x.id}" ${x.id===S.cur?'selected':''}>${esc(comp(x.company).name)} · ${esc(stu(x.student).name)}</option>`).join('');
   const done=STAGES.filter(s=>st[s.k]).length;
-  $('#line').innerHTML=`<span class="prog" style="width:${Math.max(0,STAGES.findLastIndex(s=>st[s.k]))*84/5}%"></span>`+STAGES.map((s,i)=>`<a href="#${s.k}" class="st ${st[s.k]?'done':''} ${s.k==='select'?'fixed':''} ${cur===s.k?'on':''}" style="color:inherit;text-decoration:none" aria-current="${cur===s.k}"><span class="dot">${s.k==='select'?'<svg viewBox="0 0 24 24" aria-label="완료" fill="none" stroke="currentColor" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>':i+1}</span><b>${s.n}</b><small>${s.d}</small></a>`).join('');
+  $('#line').innerHTML=`<span class="prog" style="width:${Math.max(0,STAGES.findLastIndex(s=>st[s.k]))*84/5}%"></span>`+STAGES.map((s,i)=>`<${s.k==='select'?'div':'a'} ${s.k==='select'?'aria-disabled="true" title="심사위원회 확정 완료"':`href="#${s.k}"`} class="st ${st[s.k]?'done':''} ${s.k==='select'?'fixed':''} ${cur===s.k?'on':''}" style="color:inherit;text-decoration:none" aria-current="${cur===s.k}"><span class="dot">${s.k==='select'?'<svg viewBox="0 0 24 24" aria-label="완료" fill="none" stroke="currentColor" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>':i+1}</span><b>${s.n}</b><small>${s.d}</small></${s.k==='select'?'div':'a'}>`).join('');
   $('#tabs2').innerHTML=`<a href="#data" class="${cur==='data'?'on':''}">데이터 흐름 · 전송 기록 (${S.log.length})</a><span class="note" style="padding:10px 0">${done}/6 단계 완료</span>${samp?'':'<span class="tag t-ex" style="align-self:center">AI 연결 안 됨 · 직접 작성 모드</span>'}`;
   $('#view').innerHTML=p||cur==='select'||cur==='data'?V[cur](p):'<p>매칭된 과제가 없습니다. <a href="#select">선정</a>에서 매칭을 확정하세요.</p>';
   if(cur==='data')runTest();
