@@ -75,7 +75,7 @@ pre{white-space:pre-wrap;background:var(--panel);padding:12px;border-radius:6px;
 .phs img{display:block;width:100%;aspect-ratio:1;object-fit:cover;cursor:zoom-in}
 .phs figcaption{padding:6px}.phs input{min-height:36px;padding:4px 6px;font-size:14px}.phs button{min-height:36px;padding:4px 8px;font-size:13px;width:100%;margin-top:4px}
 .filebtn{display:flex;align-items:center;justify-content:center;min-height:44px;margin:0;padding:8px 14px;border:1px solid var(--line);border-radius:6px;background:var(--bg);color:var(--ink);font-size:15px;font-weight:500;cursor:pointer}.filebtn:hover{border-color:var(--ink)}.vh{position:absolute;width:1px;height:1px;opacity:0;overflow:hidden}.vh:focus-visible+*,.filebtn:focus-within{outline:3px solid var(--blue)}
-.stagehead{display:flex;flex-wrap:wrap;gap:10px 16px;align-items:center;justify-content:space-between;margin-bottom:6px}.stagehead h2{margin:0}.pn{display:flex;gap:8px}.pn button{min-width:96px}.pn .nx:not(:disabled){background:var(--ink);border-color:var(--ink);color:var(--bg)}
+.stagehead{display:flex;flex-wrap:wrap;gap:10px 16px;align-items:center;justify-content:space-between;margin-bottom:6px}.stagehead h2{margin:0}.pn{display:flex;gap:8px}.pn button{min-width:96px}.pn .fin{background:var(--green)!important;border-color:var(--green)!important;color:#fff!important}.pn .nx:not(:disabled){background:var(--ink);border-color:var(--ink);color:var(--bg)}
 .pcbox{border:2px solid var(--green);background:var(--greenBg);border-radius:8px;padding:12px;margin-top:12px}
 #pv .box{border-top-color:var(--green);max-width:1000px}#pv img{display:block;max-width:100%;max-height:72vh;margin:0 auto;border-radius:6px}
 .toast{position:fixed;bottom:16px;left:50%;transform:translateX(-50%);background:var(--ink);color:var(--bg);padding:10px 16px;border-radius:8px;font-size:15px;opacity:0;transition:opacity .2s;pointer-events:none;z-index:10}
@@ -477,18 +477,18 @@ V.data=()=>`<h2>데이터 흐름</h2><p class="note">무엇이 어디까지 가�
   ${S.log.map(l=>`<details class="card"><summary>${esc(l.at)} · ${esc(l.purpose)} · ${l.chars}자</summary><pre>${esc(l.payload)}</pre></details>`).join('')||'<p class="note">아직 보낸 내용이 없습니다.</p>'}
  </div></div>`;
 
-let cur='observe';
+let cur='observe',allDone=false;
 function render(){
   const p=P(),st=status(p),h=location.hash.slice(1);
   cur=[...STAGES.map(s=>s.k),'data'].includes(h)?h:cur;
   $('#proj').innerHTML=S.projects.map(x=>`<option value="${x.id}" ${x.id===S.cur?'selected':''}>${esc(comp(x.company).name)} · ${esc(stu(x.student).name)}</option>`).join('');
   const done=STAGES.filter(s=>st[s.k]).length;
-  const ci=Math.max(1,STAGES.findIndex(s=>s.k===cur)),CHK='<svg viewBox="0 0 24 24" aria-label="완료" fill="none" stroke="currentColor" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>';
-  $('#line').innerHTML=`<span class="prog" style="width:${ci*84/5}%"></span>`+STAGES.map((s,i)=>`<div class="st ${i<ci?'fixed':''} ${i===ci?'on':''}" ${i===ci?'aria-current="step"':''}><span class="dot">${i<ci?CHK:i+1}</span><b>${s.n}</b><small>${s.d}</small></div>`).join('');
+  const ci=cur==='transition'&&allDone?6:Math.max(1,STAGES.findIndex(s=>s.k===cur)),CHK='<svg viewBox="0 0 24 24" aria-label="완료" fill="none" stroke="currentColor" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>';
+  $('#line').innerHTML=`<span class="prog" style="width:${Math.min(ci,5)*84/5}%"></span>`+STAGES.map((s,i)=>`<div class="st ${i<ci?'fixed':''} ${i===ci?'on':''}" ${i===ci?'aria-current="step"':''}><span class="dot">${i<ci?CHK:i+1}</span><b>${s.n}</b><small>${s.d}</small></div>`).join('');
   $('#view').innerHTML=p||cur==='select'||cur==='data'?V[cur](p):'<p>매칭된 과제가 없습니다. <a href="#select">선정</a>에서 매칭을 확정하세요.</p>';
   const order=['observe','judge','design','brief','transition'],ix=order.indexOf(cur),h2=$('#view h2');
   if(ix>=0&&h2){const name=k=>STAGES.find(s=>s.k===k).n,prev=order[ix-1],next=order[ix+1],head=document.createElement('div');head.className='stagehead';
-    head.innerHTML=`<nav class="pn" aria-label="단계 이동"><button data-go="${prev||''}" ${prev?`title="이전 단계: ${name(prev)}"`:'disabled'}>← 이전</button><button class="nx" data-go="${next||''}" ${next?`title="다음 단계: ${name(next)}"`:'disabled'}>다음 →</button></nav>`;
+    head.innerHTML=`<nav class="pn" aria-label="단계 이동"><button data-go="${prev||''}" ${prev?`title="이전 단계: ${name(prev)}"`:'disabled'}>← 이전</button>${next?`<button class="nx" data-go="${next}" title="다음 단계: ${name(next)}">다음 →</button>`:allDone?'<button class="nx" disabled>완료됨 ✓</button>':'<button class="nx fin" data-fin="1">완료</button>'}</nav>`;
     h2.replaceWith(head);head.prepend(h2)}
   if(cur==='data')runTest();
 }
@@ -521,7 +521,8 @@ view.addEventListener('change',e=>{const d=e.target.dataset,el=e.target,id=el.id
   const map={dT:p=>p.design.task=el.value,eOk:p=>p.design.expert.ok=el.checked,bD:p=>{p.brief.decision=el.value;p.brief.date=el.value?today():''},
    tS:p=>p.trans.start=el.value,tE:p=>p.trans.end=el.value,tR:p=>p.trans.result=el.value,cs:p=>p.trans.consent=el.checked,ex:p=>p.trans.extra=el.checked};
   if(map[id])upd(map[id])});
-view.addEventListener('click',async e=>{const go=e.target.closest('button[data-go]');if(go){if(go.dataset.go){location.hash=go.dataset.go;scrollTo({top:0})}return}
+view.addEventListener('click',async e=>{const fin=e.target.closest('button[data-fin]');if(fin){allDone=true;render();toast('모든 단계를 완료했습니다');return}
+  const go=e.target.closest('button[data-go]');if(go){allDone=false;if(go.dataset.go){location.hash=go.dataset.go;scrollTo({top:0})}return}
   const im=e.target.closest('img[data-pv]');if(im){const r=PH.find(x=>x.id===im.dataset.pv);if(r){$('#pvI').src=r.url;$('#pvI').alt=r.label;$('#pvC').textContent=`${r.label} · ${r.date}`;$('#pv').classList.add('open');$('#pvX').focus()}return}
   const b=e.target.closest('button');if(!b)return;
   if(b.dataset.phd){const k=b.dataset.phd;await delPhotos(r=>r.id===k);render();return}const id=b.id,d=b.dataset,p=P();
