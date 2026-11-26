@@ -78,6 +78,7 @@ pre{white-space:pre-wrap;background:var(--panel);padding:12px;border-radius:6px;
 .phs figcaption{padding:6px}.phs input{min-height:36px;padding:4px 6px;font-size:14px}.phs button{min-height:36px;padding:4px 8px;font-size:13px;width:100%;margin-top:4px}
 .filebtn{display:flex;align-items:center;justify-content:center;min-height:44px;margin:0;padding:8px 14px;border:1px solid var(--line);border-radius:6px;background:var(--bg);color:var(--ink);font-size:15px;font-weight:500;cursor:pointer}.filebtn:hover{border-color:var(--ink)}.vh{position:absolute;width:1px;height:1px;opacity:0;overflow:hidden}.vh:focus-visible+*,.filebtn:focus-within{outline:3px solid var(--blue)}
 .stagehead{display:flex;flex-wrap:wrap;gap:10px 16px;align-items:center;justify-content:space-between;margin-bottom:6px}.stagehead h2{margin:0}.pn{display:flex;gap:8px}.pn button{min-width:96px}.pn .fin{background:var(--green)!important;border-color:var(--green)!important;color:#fff!important}.pn .nx:not(:disabled){background:var(--ink);border-color:var(--ink);color:var(--bg)}
+.gotq{display:inline-flex;align-items:center;gap:6px;min-height:44px;padding:8px 14px;border-radius:6px;background:var(--green);color:#fff;font-size:15px;font-weight:500}.gotq svg{width:18px;height:18px}
 .pcbox{border:2px solid var(--green);background:var(--greenBg);border-radius:8px;padding:12px;margin-top:12px}
 #pv .box{border-top-color:var(--green);max-width:1000px}#pv img{display:block;max-width:100%;max-height:72vh;margin:0 auto;border-radius:6px}
 .toast{position:fixed;bottom:16px;left:50%;transform:translateX(-50%);background:var(--ink);color:var(--bg);padding:10px 16px;border-radius:8px;font-size:15px;opacity:0;transition:opacity .2s;pointer-events:none;z-index:10}
@@ -350,7 +351,7 @@ V.observe=p=>`<h2>관찰</h2><p class="note">현장 작업마다 AI가 확인할
  <div class="cols"><div class="col aiC"><span class="tag t-ai">AI가 하는 일</span>
   ${p.tasks.map(t=>`<div class="card"><h3>${esc(t.name)}</h3>${t.desc?`<p class="note" style="margin:0">${esc(t.desc)}</p>`:''}
    ${t.obsQ.length?`<div class="draft">${t.obsQ.map((q,i)=>`${i+1}. ${esc(q)}`).join('\n')}</div>`:''}
-   <div class="row">${samp||(t.demoQ&&t.demoQ.length&&!t.obsQ.length)?`<button class="ai" id="oq-${t.id}">확인 질문 받기</button>`:aiBtn('oq-'+t.id,'확인 질문 받기')}<button class="ghost" data-del="${t.id}">작업 삭제</button></div>
+   <div class="row">${t.obsQ.length?'<span class="gotq" title="확인 질문을 받았습니다"><svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>확인 질문 받음</span>':samp||(t.demoQ&&t.demoQ.length)?`<button class="ai" id="oq-${t.id}">확인 질문 받기</button>`:aiBtn('oq-'+t.id,'확인 질문 받기')}<button class="ghost" data-del="${t.id}">작업 삭제</button></div>
    <label for="oa-${t.id}">관찰 기록</label><textarea id="oa-${t.id}" data-obs="${t.id}">${esc(t.obsA)}</textarea>
    ${t.photo||photosOf(t.id).length?photoBox(t):''}</div>`).join('')}
  <datalist id="phLabels">${LABELS.map(l=>`<option value="${l}">`).join('')}</datalist>
