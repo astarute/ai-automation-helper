@@ -79,6 +79,11 @@ pre{white-space:pre-wrap;background:var(--panel);padding:12px;border-radius:6px;
 .filebtn{display:flex;align-items:center;justify-content:center;min-height:44px;margin:0;padding:8px 14px;border:1px solid var(--line);border-radius:6px;background:var(--bg);color:var(--ink);font-size:15px;font-weight:500;cursor:pointer}.filebtn:hover{border-color:var(--ink)}.vh{position:absolute;width:1px;height:1px;opacity:0;overflow:hidden}.vh:focus-visible+*,.filebtn:focus-within{outline:3px solid var(--blue)}
 .stagehead{display:flex;flex-wrap:wrap;gap:10px 16px;align-items:center;justify-content:space-between;margin-bottom:6px}.stagehead h2{margin:0}.pn{display:flex;gap:8px}.pn button{min-width:96px}.pn .fin{background:var(--green)!important;border-color:var(--green)!important;color:#fff!important}.pn .nx:not(:disabled){background:var(--ink);border-color:var(--ink);color:var(--bg)}
 .gotq{display:inline-flex;align-items:center;gap:6px;min-height:44px;padding:8px 14px;border-radius:6px;background:var(--green);color:#fff;font-size:15px;font-weight:500}.gotq svg{width:18px;height:18px}
+.draft.dq{white-space:normal}.q{display:flex;gap:10px;align-items:flex-start;margin-top:8px}.q+.q{margin-top:12px}
+.qn{flex:none;width:24px;height:24px;border-radius:50%;background:var(--blue);color:#fff;font-size:13px;font-weight:700;display:grid;place-items:center;margin-top:1px}
+.qb{flex:1}.qt{font-weight:500}.ex{margin-top:8px;background:var(--bg);border:1px solid var(--line);border-radius:8px;padding:10px 12px}
+.exl{display:inline-block;font-size:13px;font-weight:700;color:var(--mute);margin-bottom:4px}.ex dl{display:grid;grid-template-columns:auto 1fr;gap:6px 16px;margin:0}
+.ex dt{color:var(--mute);font-size:15px}.ex dd{margin:0;font-weight:700;font-variant-numeric:tabular-nums}
 .pcbox{border:2px solid var(--green);background:var(--greenBg);border-radius:8px;padding:12px;margin-top:12px}
 #pv .box{border-top-color:var(--green);max-width:1000px}#pv img{display:block;max-width:100%;max-height:72vh;margin:0 auto;border-radius:6px}
 .toast{position:fixed;bottom:16px;left:50%;transform:translateX(-50%);background:var(--ink);color:var(--bg);padding:10px 16px;border-radius:8px;font-size:15px;opacity:0;transition:opacity .2s;pointer-events:none;z-index:10}
@@ -180,7 +185,7 @@ const sample=()=>({
     ans:{field:'비전 검사',rep:'예',hard:'예',data:'지금 가능',note:'① 눈으로 보고 판정하는 일 → 비전 검사\n② 6초마다 같은 동작 반복, 예외 적음\n③ 오후가 되면 작은 흑점을 놓친다고 작업자가 말함\n④ 폐기 전 불량품을 모아 두므로 사진을 바로 찍을 수 있음. 흑점 크기 기준은 반장과 함께 글로 정리 가능'},
     jdraft:{field:'비전 검사',rep:'예',hard:'예',data:'지금 가능',conc:'AI 시범 후보',why:'반복적인 육안 판정이고 피로로 누락이 생깁니다. 모아 둔 불량품으로 학습용 사진을 바로 만들 수 있습니다.'},
     conc:'AI 시범 후보',concWhy:'흑점 판정부터 좁혀서 시범. 데이터를 바로 만들 수 있음',fact:{ok:true,note:'흑점 외에 은줄 불량도 가끔 있음',date:'2026-11-12'}}),
-   T('t4','검사 시간 처리량','',{photo:false,demoQ:['제품당 판정에 걸리는 시간과 하루 검사 물량은 어느 정도인가요?\n   예시\n   1개 : 5분\n   하루 검사 물량 : 96개'],obsQ:[]})],
+   T('t4','검사 시간 처리량','',{photo:false,demoQ:['제품당 판정에 걸리는 시간과 하루 검사 물량은 어느 정도인가요?\n예시\n1개당 판정 시간 : 5분\n하루 검사 물량 : 96개'],obsQ:[]})],
   design:{task:'t1',pick:'흑점 판정만 먼저 시범: 카메라 1대 + 조명으로 흑점 의심품을 골라내고 최종 판정은 작업자가 함',expert:{ok:true,note:'처음부터 완전 자동 판정 말고 의심품 선별로 시작하는 것이 맞음. 조명 조건을 먼저 고정할 것'},
    draft:{cases:[{text:'중소 사출 업체가 카메라 2대와 조명으로 외관 검사 일부를 자동화함. 초기에는 의심품 선별 용도로 운영',src:'S1'}],
     data:['흑점·미성형·양품 사진 (같은 조명, 같은 각도)','불량 판정 기준 문서 (흑점 크기 기준 포함)','라인 속도와 제품 1개당 검사 시간','현재 불량 유출 건수 기록'],
@@ -203,7 +208,7 @@ const sample=()=>({
   {id:'S1',title:'예시: 사출품 비전 검사 도입 사례',src:'자료집 p.12 (예시 항목 — 실제 자료로 교체)',body:'중소 사출 업체가 카메라 2대와 조명으로 외관 검사 일부를 자동화한 사례.'},
   {id:'S2',title:'예시: 스마트공장 지원사업 안내',src:'자료집 p.40 (예시 항목 — 실제 자료로 교체)',body:'중소 제조기업 대상 스마트공장 구축 지원사업 개요.'}],
  dict:{company:'가나정밀, 다라금속, 마바식품',customer:'현대모비스, 한온시스템',person:'김하늘, 이도윤, 최서준, 박숙련, 정현장',other:''},
- v3:1,v4:1,
+ v3:1,v4:1,v5:1,
  log:[
   {at:'2026. 11. 20. 오전 10:12',purpose:'대표 브리핑 초안',chars:236,payload:'자료(비식별 처리됨):\n{\n "작업": "사출품 외관 검사",\n "판별결론": "AI 시범 후보",\n "학생구상": "흑점 판정만 먼저 시범: 카메라 [수치] + 조명으로 흑점 의심품을 골라내고 최종 판정은 작업자가 함"\n}'},
   {at:'2026. 11. 12. 오후 3:40',purpose:'판별표 초안',chars:198,payload:'자료(비식별 처리됨):\n{\n "작업": "사출품 외관 검사",\n "설명": "성형 직후 제품을 작업자가 조명 아래서 돌려 보며 긁힘·미성형·흑점을 찾는다. 하루 [수치], [수치]."\n}'},
@@ -213,7 +218,8 @@ const sample=()=>({
 let S;
 try{S=JSON.parse(localStorage.getItem('aiPlat.v2'))}catch(e){}
 if(!S||!S.projects)S=sample();
-if(!S.v4){const p1=S.projects.find(p=>p.id==='p1');if(p1&&!p1.tasks.some(t=>t.id==='t4'))p1.tasks.push(T('t4','검사 시간 처리량','',{photo:false,demoQ:['제품당 판정에 걸리는 시간과 하루 검사 물량은 어느 정도인가요?\n   예시\n   1개 : 5분\n   하루 검사 물량 : 96개'],obsQ:[]}));S.v4=1}
+if(!S.v5){for(const p of S.projects)for(const t of p.tasks)if(t.id==='t4'){t.demoQ=['제품당 판정에 걸리는 시간과 하루 검사 물량은 어느 정도인가요?\n예시\n1개당 판정 시간 : 5분\n하루 검사 물량 : 96개'];if(t.obsQ.length)t.obsQ=t.demoQ.slice()}S.v5=1}
+if(!S.v4){const p1=S.projects.find(p=>p.id==='p1');if(p1&&!p1.tasks.some(t=>t.id==='t4'))p1.tasks.push(T('t4','검사 시간 처리량','',{photo:false,demoQ:['제품당 판정에 걸리는 시간과 하루 검사 물량은 어느 정도인가요?\n예시\n1개당 판정 시간 : 5분\n하루 검사 물량 : 96개'],obsQ:[]}));S.v4=1}
 if(!S.v3){const p1=S.projects.find(p=>p.id==='p1');if(p1){p1.tasks=p1.tasks.filter(t=>t.id==='t1');const t=p1.tasks[0];if(t){t.name='사출품 불량 판정';t.obsQ=['불량 판정의 제품은 어떠한 형식으로 구분되는가?'];t.demoQ=[]}}S.v3=1}
 for(const p of S.projects)for(const t of p.tasks){if(t.photo===undefined)t.photo=/외관\s*검사/.test(t.name);if(t.demoQ===undefined&&p.id==='p1'&&t.obsQ&&t.obsQ.length){t.demoQ=t.obsQ;t.obsQ=[]}if(t.desc==='성형 직후 제품을 작업자가 조명 아래서 돌려 보며 긁힘·미성형·흑점을 찾는다. 하루 8시간, 3명.'||t.desc==='교대마다 생산 수량, 불량 수량, 금형 번호를 종이에 적고 사무실에서 엑셀로 다시 입력.')t.desc=''}
 const save=()=>{try{localStorage.setItem('aiPlat.v2',JSON.stringify(S))}catch(e){}};
@@ -325,6 +331,11 @@ function photoBox(t){const list=photosOf(t.id);
   ${list.length?`<div class="phs">${list.map(r=>`<figure><img src="${r.url}" alt="${esc(r.label)} 사진" data-pv="${r.id}"><figcaption><input aria-label="분류" list="phLabels" data-phl="${r.id}" value="${esc(r.label)}"><span class="note">${esc(r.date)}</span><button class="ghost" data-phd="${r.id}">삭제</button></figcaption></figure>`).join('')}</div>`:'<p class="note" style="margin:8px 0 0">불량 유형별로 양품과 함께 찍어 두면 판별 ④(데이터를 지금 만들 수 있나)의 근거가 됩니다.</p>'}
  </div>`}
 
+/* 확인 질문 한 개: 첫 줄은 질문, '예시' 아래 '항목 : 값' 줄은 표로 */
+function qHTML(q,i){const L=String(q).split('\n').map(x=>x.trim()).filter(Boolean),k=L.indexOf('예시');
+  const head=k<0?L:L.slice(0,k),ex=k<0?[]:L.slice(k+1).map(x=>{const m=x.split(/\s*:\s*/);return m.length>1?[m[0],m.slice(1).join(':')]:[x,'']});
+  return`<div class="q"><span class="qn">${i+1}</span><div class="qb"><div class="qt">${esc(head.join(' '))}</div>${ex.length?`<div class="ex"><span class="exl">예시</span><dl>${ex.map(([a,b])=>`<dt>${esc(a)}</dt><dd>${esc(b)}</dd>`).join('')}</dl></div>`:''}</div></div>`}
+
 const V={};
 V.select=()=>{
   const cm=S.committee,ck=c=>`<label class="ck"><input type="checkbox" data-cm="${c.id}" ${cm[c.id]?'checked':''}>선정</label>`;
@@ -352,7 +363,7 @@ V.select=()=>{
 V.observe=p=>`<h2>관찰</h2><p class="note">현장 작업마다 AI가 확인할 질문을 냅니다. 학생은 현장에서 본 것을 적습니다. 여기서 정할 것은 없습니다.</p>
  <div class="cols"><div class="col aiC"><span class="tag t-ai">AI가 하는 일</span>
   ${p.tasks.map(t=>`<div class="card"><h3>${esc(t.name)}</h3>${t.desc?`<p class="note" style="margin:0">${esc(t.desc)}</p>`:''}
-   ${t.obsQ.length?`<div class="draft">${t.obsQ.map((q,i)=>`${i+1}. ${esc(q)}`).join('\n')}</div>`:''}
+   ${t.obsQ.length?`<div class="draft dq">${t.obsQ.map(qHTML).join('')}</div>`:''}
    <div class="row">${t.obsQ.length?'<span class="gotq" title="확인 질문을 받았습니다"><svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>확인 질문 받음</span>':samp||(t.demoQ&&t.demoQ.length)?`<button class="ai" id="oq-${t.id}">확인 질문 받기</button>`:aiBtn('oq-'+t.id,'확인 질문 받기')}<button class="ghost" data-del="${t.id}">작업 삭제</button></div>
    <label for="oa-${t.id}">관찰 기록</label><textarea id="oa-${t.id}" data-obs="${t.id}">${esc(t.obsA)}</textarea>
    ${t.photo||photosOf(t.id).length?photoBox(t):''}</div>`).join('')}
