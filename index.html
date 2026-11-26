@@ -12,7 +12,9 @@
    PICTURE: 상단의 공정 라인(선정→전환)과 회사 PC/외부 경계를 보여주는 데이터 흐름도.
    COLOUR and TYPE: 흰 바탕, 철강 잉크, AI=파랑, 사람 결정=앰버, 회사 PC=초록, 외부 전송=빨강. IBM Plex Sans KR.
    LAYOUT: 라인 아래 각 공정을 'AI가 하는 일 | 사람이 정하는 것' 두 열로. 600px 이하에서 한 열. */
-:root{color-scheme:light dark;--bg:light-dark(#ffffff,#0e1116);--panel:light-dark(#f4f5f7,#161a20);--ink:light-dark(#14181c,#eef0f2);--mute:light-dark(#5b636c,#a3abb4);--line:light-dark(#d5d9de,#2c333c);--blue:light-dark(#0a5cff,#5c95ff);--amber:#ffb400;--green:light-dark(#00874c,#2fc37f);--red:light-dark(#d71f18,#ff6b63);--blueBg:light-dark(#eaf1ff,#14223d);--amberBg:light-dark(#fff6dc,#2e2610);--greenBg:light-dark(#e5f6ee,#0f2a1e);--redBg:light-dark(#fdeceb,#33171a)}
+:root{color-scheme:light;--bg:#ffffff;--panel:#f4f5f7;--ink:#14181c;--mute:#5b636c;--line:#d5d9de;--blue:#0a5cff;--green:#00874c;--red:#d71f18;--blueBg:#eaf1ff;--amberBg:#fff6dc;--greenBg:#e5f6ee;--redBg:#fdeceb;--huInk:#7a5400;--amber:#ffb400}
+@media(prefers-color-scheme:dark){:root:not([data-theme=light]){color-scheme:dark;--bg:#0e1116;--panel:#161a20;--ink:#eef0f2;--mute:#a3abb4;--line:#2c333c;--blue:#5c95ff;--green:#2fc37f;--red:#ff6b63;--blueBg:#14223d;--amberBg:#2e2610;--greenBg:#0f2a1e;--redBg:#33171a;--huInk:#ffc94d}}
+:root[data-theme=dark]{color-scheme:dark;--bg:#0e1116;--panel:#161a20;--ink:#eef0f2;--mute:#a3abb4;--line:#2c333c;--blue:#5c95ff;--green:#2fc37f;--red:#ff6b63;--blueBg:#14223d;--amberBg:#2e2610;--greenBg:#0f2a1e;--redBg:#33171a;--huInk:#ffc94d}
 :root[data-theme=light]{color-scheme:light}:root[data-theme=dark]{color-scheme:dark}
 *{box-sizing:border-box;min-width:0}
 body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.6 "IBM Plex Sans KR",system-ui,sans-serif;overflow-x:clip}
@@ -49,7 +51,7 @@ label.ck{display:flex;gap:10px;align-items:center;color:var(--ink);font-size:15p
 .col{border-radius:10px;padding:18px;border:1px solid var(--line)}
 .col.aiC{border-top:6px solid var(--blue)}.col.huC{border-top:6px solid var(--amber)}
 .tag{display:inline-block;font-size:13px;font-weight:500;padding:2px 8px;border-radius:999px;white-space:nowrap}
-.t-ai{background:var(--blueBg);color:var(--blue)}.t-hu{background:var(--amberBg);color:light-dark(#7a5400,#ffc94d)}.t-pc{background:var(--greenBg);color:var(--green)}.t-ex{background:var(--redBg);color:var(--red)}
+.t-ai{background:var(--blueBg);color:var(--blue)}.t-hu{background:var(--amberBg);color:var(--huInk)}.t-pc{background:var(--greenBg);color:var(--green)}.t-ex{background:var(--redBg);color:var(--red)}
 .card{background:var(--panel);border-radius:8px;padding:14px;margin:10px 0}
 .note{font-size:14px;color:var(--mute)}
 .draft{border-left:4px solid var(--blue);background:var(--blueBg);padding:10px 12px;border-radius:0 6px 6px 0;margin:8px 0;white-space:pre-wrap}
