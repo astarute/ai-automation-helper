@@ -374,7 +374,7 @@ V.observe=p=>`<h2>관찰</h2><p class="note">현장 작업마다 AI가 확인할
   <label for="nd">작업 설명</label><textarea id="nd" placeholder="누가, 얼마나 자주, 어떻게 하는지"></textarea>
   <label class="ck"><input type="checkbox" id="nph">제품 사진이 필요한 작업 (예: 외관 검사)</label>
   <div class="row" style="margin-top:10px"><button id="addT">작업 추가</button></div>
-  <p class="note">설명에 적은 회사명·고객사명·사람 이름·숫자는 AI로 보낼 때 자동으로 가려집니다. 가릴 단어는 <a href="#data">데이터 흐름</a>에서 관리합니다.</p>
+  <p class="note"><a href="#data" title="설명에 적은 회사명·고객사명·사람 이름·숫자는 AI로 보낼 때 자동으로 가려집니다. 가릴 단어는 이 화면에서 관리합니다.">데이터 흐름?</a></p>
  </div></div>`;
 
 const opt=(v,list)=>list.map(x=>`<option ${v===x?'selected':''}>${esc(x)}</option>`).join('');
