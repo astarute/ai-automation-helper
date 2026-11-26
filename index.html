@@ -17,7 +17,7 @@
 :root[data-theme=dark]{color-scheme:dark;--bg:#0e1116;--panel:#161a20;--ink:#eef0f2;--mute:#a3abb4;--line:#2c333c;--blue:#5c95ff;--green:#2fc37f;--red:#ff6b63;--blueBg:#14223d;--amberBg:#2e2610;--greenBg:#0f2a1e;--redBg:#33171a;--huInk:#ffc94d}
 :root[data-theme=light]{color-scheme:light}:root[data-theme=dark]{color-scheme:dark}
 *{box-sizing:border-box;min-width:0}
-body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.6 "IBM Plex Sans KR",system-ui,sans-serif;overflow-x:clip}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.6 "IBM Plex Sans KR",system-ui,sans-serif;overflow-x:hidden;overflow-x:clip}
 h1,h2,h3{line-height:1.2;text-wrap:balance;margin:0}
 h1{font-size:clamp(24px,3.4vw,34px)}h2{font-size:22px;margin-bottom:6px}h3{font-size:17px;margin:0 0 6px}
 .band{padding:clamp(20px,3vw,40px) max(4vw,16px)}.wrap{max-width:1240px;margin:0 auto}
@@ -312,8 +312,11 @@ async function seedDemo(force){
     PH.push({...r,url:URL.createObjectURL(blob)})}catch(e){}}
   if(PH.some(r=>r.id.startsWith('demo-'))&&!phMem){try{localStorage.setItem('aiPlat.demoPh','1')}catch(e){}}
 }
+function loadImg(file){ // createImageBitmap이 없거나 실패하는 브라우저(구형 사파리 등) 대비
+  if(window.createImageBitmap)return createImageBitmap(file).catch(()=>viaImg(file));return viaImg(file)}
+function viaImg(file){return new Promise((res,rej)=>{const u=URL.createObjectURL(file),im=new Image();im.onload=()=>{URL.revokeObjectURL(u);res(im)};im.onerror=()=>{URL.revokeObjectURL(u);rej()};im.src=u})}
 async function shrink(file){ // 1600px 이하 JPEG로 다시 그림: 용량을 줄이고 위치(GPS) 등 사진 정보도 지워짐
-  const bmp=await createImageBitmap(file),k=Math.min(1,1600/Math.max(bmp.width,bmp.height)),c=document.createElement('canvas');
+  const bmp=await loadImg(file),k=Math.min(1,1600/Math.max(bmp.width,bmp.height)),c=document.createElement('canvas');
   c.width=Math.round(bmp.width*k);c.height=Math.round(bmp.height*k);c.getContext('2d').drawImage(bmp,0,0,c.width,c.height);bmp.close?.();
   return new Promise((res,rej)=>c.toBlob(b=>b?res(b):rej(),'image/jpeg',.85))}
 async function addPhotos(task,files,label){
@@ -537,7 +540,7 @@ view.addEventListener('click',async e=>{const fin=e.target.closest('button[data-
   if(id==='addC'||id==='addS'){const c=id==='addC';$('#addForm').innerHTML=`<div class="card"><label>${c?'기업명':'이름'}</label><input id="fA"><label>${c?'업종':'전공'}</label><input id="fB"><label>${c?'신청 내용':'AI 전환 구상'}</label><textarea id="fC"></textarea><button id="${c?'svC':'svS'}" style="margin-top:8px">저장</button></div>`;return}
   if(id==='svC'||id==='svS'){const o={id:uid(),name:$('#fA').value,text:$('#fC').value};if(!o.name)return;if(id==='svC'){o.ind=$('#fB').value;S.companies.push(o)}else{o.major=$('#fB').value;S.students.push(o)}save();render();return}
   if(id==='mk'){const c=$('#mC').value,s=$('#mS2').value;if(!c||!s)return toast('위원회가 기업과 학생을 먼저 선정해야 합니다');
-    const np={...structuredClone(sample().projects[0]),id:uid(),company:c,student:s,mentor:$('#mM').value,tasks:[]};
+    const np={...JSON.parse(JSON.stringify(sample().projects[0])),id:uid(),company:c,student:s,mentor:$('#mM').value,tasks:[]};
     np.trans={logs:[],summary:'',result:'',start:'',end:'',consent:false,extra:false};np.brief={draft:null,decision:'',date:'',note:''};np.design={task:'',draft:null,pick:'',expert:{ok:false,note:''},sim:{hours:8,people:1,wage:15000,days:250,save:50,capex:0,opex:0}};
     S.projects.push(np);S.cur=np.id;save();toast('매칭을 확정했습니다');render();return}
   if(id.startsWith('oq-')){const t=p.tasks.find(x=>x.id===id.slice(3));
