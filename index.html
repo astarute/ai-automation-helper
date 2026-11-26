@@ -173,21 +173,21 @@ const sample=()=>({
  projects:[{id:'p1',company:'c1',student:'s1',mentor:'박숙련 반장',
   tasks:[
    T('t1','사출품 외관 검사','',{photo:true,
-    obsQ:['불량 유형별로 하루에 몇 개쯤 나오는가?','작업자마다 불량 판정이 다른 경우가 있는가?','제품 한 개를 검사하는 데 몇 초 걸리는가?','불량품은 따로 모아 두는가, 바로 버리는가?','고객사가 클레임을 거는 불량은 주로 어떤 유형인가?'],
+    demoQ:['불량 유형별로 하루에 몇 개쯤 나오는가?','작업자마다 불량 판정이 다른 경우가 있는가?','제품 한 개를 검사하는 데 몇 초 걸리는가?','불량품은 따로 모아 두는가, 바로 버리는가?','고객사가 클레임을 거는 불량은 주로 어떤 유형인가?'],
     obsA:'제품 1개당 약 6초. 흑점이 가장 많고 다음이 미성형. 작업자 간 흑점 판정이 엇갈림(크기 기준이 머릿속에만 있음). 불량품은 박스에 모아 주 1회 폐기 — 사진 촬영 가능. 고객 클레임 대부분이 흑점 유출.',
     judgeQ:{field:['이 작업의 핵심은 눈으로 보고 판단하는 일인가, 숫자를 예측하는 일인가?','검사 결과가 다음 공정 조건에 쓰이는가?'],rep:['같은 동작과 판단이 하루에 몇 번 반복되는가?','예외 상황은 얼마나 자주 생기는가?'],hard:['8시간 내내 같은 집중도를 유지할 수 있는가?','작은 흑점을 사람이 놓치는 경우가 있는가?'],data:['불량품과 양품 사진을 지금 찍을 수 있는가?','불량 판정 기준을 글로 적을 수 있는가?']},
     ans:{field:'비전 검사',rep:'예',hard:'예',data:'지금 가능',note:'① 눈으로 보고 판정하는 일 → 비전 검사\n② 6초마다 같은 동작 반복, 예외 적음\n③ 오후가 되면 작은 흑점을 놓친다고 작업자가 말함\n④ 폐기 전 불량품을 모아 두므로 사진을 바로 찍을 수 있음. 흑점 크기 기준은 반장과 함께 글로 정리 가능'},
     jdraft:{field:'비전 검사',rep:'예',hard:'예',data:'지금 가능',conc:'AI 시범 후보',why:'반복적인 육안 판정이고 피로로 누락이 생깁니다. 모아 둔 불량품으로 학습용 사진을 바로 만들 수 있습니다.'},
     conc:'AI 시범 후보',concWhy:'흑점 판정부터 좁혀서 시범. 데이터를 바로 만들 수 있음',fact:{ok:true,note:'흑점 외에 은줄 불량도 가끔 있음',date:'2026-11-12'}}),
    T('t2','작업일지 수기 작성','',{
-    obsQ:['종이에 적는 데 교대당 몇 분 걸리는가?','엑셀 재입력은 누가, 언제 하는가?','잘못 옮겨 적는 경우가 있는가?','이 기록을 누가 어디에 쓰는가?','적는 항목은 매번 같은가?'],
+    demoQ:['종이에 적는 데 교대당 몇 분 걸리는가?','엑셀 재입력은 누가, 언제 하는가?','잘못 옮겨 적는 경우가 있는가?','이 기록을 누가 어디에 쓰는가?','적는 항목은 매번 같은가?'],
     obsA:'교대당 10분 정도. 사무실 직원이 다음 날 오전에 엑셀로 옮김. 금형 번호를 잘못 옮기는 일이 월 몇 번 있음. 항목은 늘 같음(수량, 불량, 금형 번호).',
     judgeQ:{field:['기록을 옮기는 일인가, 기록에서 무언가를 판단하는 일인가?'],rep:['항목이 매번 같은가?'],hard:['사람이 하기에 어렵거나 위험한 부분이 있는가?'],data:['기록이 이미 표 형태로 있는가?']},
     ans:{field:'기록 자동화',rep:'예',hard:'아니오',data:'지금 가능',note:'옮겨 적는 일. 항목은 고정. 힘든 일은 아니고 번거로움이 문제. 태블릿 입력 양식이면 재입력이 없어짐'},
     jdraft:{field:'기록 자동화',rep:'예',hard:'아니오',data:'지금 가능',conc:'AI 시범 후보',why:'반복적이고 데이터가 있습니다. 다만 판단이 필요 없는 단순 입력이라 AI보다 입력 양식 개선이 더 적합할 수 있습니다.'},
     conc:'AI 불필요',concWhy:'판단이 필요 없는 옮겨 적기. 현장 태블릿 입력 양식으로 해결',fact:{ok:true,note:'',date:'2026-11-12'}}),
    T('t3','금형 교체 순서 결정','반장이 주문 상황을 보고 경험으로 금형 교체 순서를 정한다.',{
-    obsQ:['교체 순서를 정할 때 무엇을 먼저 보는가?','교체 한 번에 얼마나 걸리는가?','순서를 잘못 정해 납기를 놓친 적이 있는가?','반장이 없을 때는 누가 정하는가?','지난 교체 이력이 남아 있는가?'],
+    demoQ:['교체 순서를 정할 때 무엇을 먼저 보는가?','교체 한 번에 얼마나 걸리는가?','순서를 잘못 정해 납기를 놓친 적이 있는가?','반장이 없을 때는 누가 정하는가?','지난 교체 이력이 남아 있는가?'],
     obsA:'납기, 같은 색 원료끼리 묶기, 금형 온도를 봄. 교체 1회 약 40분. 반장 휴가 때 순서가 꼬여 납기를 놓친 적 있음. 교체 이력은 기록되지 않음.',
     judgeQ:{field:['순서를 정하는 일은 생산 계획에 해당하는가?'],rep:['매일 같은 방식으로 정하는가?'],hard:['고려할 조건이 사람 머리로 감당하기 어려운가?'],data:['과거 교체 이력과 주문 기록이 있는가?']},
     ans:{field:'생산 계획',rep:'아니오',hard:'예',data:'추가 수집 필요',note:'조건이 여러 개라 반장만 할 수 있음. 교체 이력이 없어 먼저 3개월은 기록부터 쌓아야 함'},
@@ -224,7 +224,7 @@ const sample=()=>({
 let S;
 try{S=JSON.parse(localStorage.getItem('aiPlat.v2'))}catch(e){}
 if(!S||!S.projects)S=sample();
-for(const p of S.projects)for(const t of p.tasks){if(t.photo===undefined)t.photo=/외관\s*검사/.test(t.name);if(t.desc==='성형 직후 제품을 작업자가 조명 아래서 돌려 보며 긁힘·미성형·흑점을 찾는다. 하루 8시간, 3명.'||t.desc==='교대마다 생산 수량, 불량 수량, 금형 번호를 종이에 적고 사무실에서 엑셀로 다시 입력.')t.desc=''}
+for(const p of S.projects)for(const t of p.tasks){if(t.photo===undefined)t.photo=/외관\s*검사/.test(t.name);if(t.demoQ===undefined&&p.id==='p1'&&t.obsQ&&t.obsQ.length){t.demoQ=t.obsQ;t.obsQ=[]}if(t.desc==='성형 직후 제품을 작업자가 조명 아래서 돌려 보며 긁힘·미성형·흑점을 찾는다. 하루 8시간, 3명.'||t.desc==='교대마다 생산 수량, 불량 수량, 금형 번호를 종이에 적고 사무실에서 엑셀로 다시 입력.')t.desc=''}
 const save=()=>{try{localStorage.setItem('aiPlat.v2',JSON.stringify(S))}catch(e){}};
 const P=()=>S.projects.find(p=>p.id===S.cur)||S.projects[0];
 const comp=id=>S.companies.find(c=>c.id===id)||{};
@@ -362,7 +362,7 @@ V.observe=p=>`<h2>관찰</h2><p class="note">현장 작업마다 AI가 확인할
  <div class="cols"><div class="col aiC"><span class="tag t-ai">AI가 하는 일</span>
   ${p.tasks.map(t=>`<div class="card"><h3>${esc(t.name)}</h3>${t.desc?`<p class="note" style="margin:0">${esc(t.desc)}</p>`:''}
    ${t.obsQ.length?`<div class="draft">${t.obsQ.map((q,i)=>`${i+1}. ${esc(q)}`).join('\n')}</div>`:''}
-   <div class="row">${aiBtn('oq-'+t.id,'확인 질문 받기')}<button class="ghost" data-del="${t.id}">작업 삭제</button></div>
+   <div class="row">${samp||(t.demoQ&&t.demoQ.length&&!t.obsQ.length)?`<button class="ai" id="oq-${t.id}">확인 질문 받기</button>`:aiBtn('oq-'+t.id,'확인 질문 받기')}<button class="ghost" data-del="${t.id}">작업 삭제</button></div>
    <label for="oa-${t.id}">관찰 기록</label><textarea id="oa-${t.id}" data-obs="${t.id}">${esc(t.obsA)}</textarea>
    ${t.photo||photosOf(t.id).length?photoBox(t):''}</div>`).join('')}
  <datalist id="phLabels">${LABELS.map(l=>`<option value="${l}">`).join('')}</datalist>
@@ -544,6 +544,7 @@ view.addEventListener('click',async e=>{const fin=e.target.closest('button[data-
     np.trans={logs:[],summary:'',result:'',start:'',end:'',consent:false,extra:false};np.brief={draft:null,decision:'',date:'',note:''};np.design={task:'',draft:null,pick:'',expert:{ok:false,note:''},sim:{hours:8,people:1,wage:15000,days:250,save:50,capex:0,opex:0}};
     S.projects.push(np);S.cur=np.id;save();toast('매칭을 확정했습니다');render();return}
   if(id.startsWith('oq-')){const t=p.tasks.find(x=>x.id===id.slice(3));
+    if(!samp){if(!t.demoQ||!t.demoQ.length)return toast('AI가 연결된 화면에서 쓸 수 있습니다');b.disabled=true;b.textContent='AI 초안 작성 중…';await new Promise(r=>setTimeout(r,900));upd(()=>t.obsQ=t.demoQ.slice());return}
     const r=await ai('관찰 질문',`현장 관찰 때 학생이 확인할 구체적 질문 5개. 형식: {"questions":["",...]}`,{작업:t.name,설명:t.desc},b);
     if(r)upd(()=>t.obsQ=r.questions||[]);return}
   if(id.startsWith('jq-')){const t=p.tasks.find(x=>x.id===id.slice(3));
